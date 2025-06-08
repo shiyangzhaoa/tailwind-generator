@@ -3,15 +3,11 @@
  */
 
 import { twMerge } from 'tailwind-merge';
-import { getTailwindBy } from '../../utils/index.mjs';
-import { noZero, try2PX } from '../functions.mjs';
+import { getTailwindBy, removeSpace } from '../../utils/index.mjs';
+import { try2PX } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
-
-const pick = (val: string) => {
-  const matches = [...val.matchAll(/([^\(]+)\(([^\)]+)\)/g)];
-
-  return [matches[0]?.[1], matches[0]?.[2]];
-};
+import { designTokenVars } from '../../tokens.mjs';
+import { functionParser } from '../../index.mjs';
 
 const map: Record<string, { key: string; convertor: (val: string) => string }> =
   {
@@ -21,39 +17,39 @@ const map: Record<string, { key: string; convertor: (val: string) => string }> =
     },
     brightness: {
       key: 'brightness',
-      convertor: noZero,
+      convertor: removeSpace,
     },
     contrast: {
       key: 'contrast',
-      convertor: noZero,
+      convertor: removeSpace,
     },
     grayscale: {
       key: 'grayscale',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
     'hue-rotate': {
       key: 'hue-rotate',
-      convertor: (v: string) => v,
+      convertor: removeSpace, // Keep the unit (deg)
     },
     invert: {
       key: 'invert',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
     opacity: {
       key: 'opacity',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
     saturate: {
       key: 'saturate',
-      convertor: noZero,
+      convertor: removeSpace,
     },
     sepia: {
       key: 'sepia',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
     url: {
       key: 'url',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
   };
 
@@ -69,7 +65,7 @@ export function backdropFilter([key, value]: [string, string]) {
   const unresolved: string[] = [];
 
   tokens.forEach((token) => {
-    const [k, v] = pick(token);
+    const [k, v] = functionParser(token);
 
     if (!k || !v) return;
 
@@ -81,8 +77,9 @@ export function backdropFilter([key, value]: [string, string]) {
 
     const { convertor } = map[k];
 
+    const convertedVal = convertor(v);
     const { tailwind, useful } = getTailwindBy({
-      [key]: `${k}(${convertor(v)})`,
+      [key]: `${k}(${designTokenVars[convertedVal] ?? convertedVal})`,
     });
 
     if (!useful) {
@@ -100,12 +97,12 @@ export function backdropFilter([key, value]: [string, string]) {
 
   return twMerge(
     ...res,
-    `[backdrop-filter:${unresolved
-      .map((token) => {
-        const [k, v] = pick(token);
+    ...unresolved.map((token) => {
+      const [k, v] = functionParser(token);
+      if (!k || !v) return;
+      const { convertor } = map[k];
 
-        return `${k}(${v})`;
-      })
-      .join('_')}]`,
+      return `backdrop-${k}-[${convertor(v)}]`;
+    }),
   );
 }

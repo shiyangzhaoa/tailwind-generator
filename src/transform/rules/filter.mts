@@ -1,27 +1,23 @@
 import { twMerge } from 'tailwind-merge';
 import { getTailwindBy, removeSpace } from '../../utils/index.mjs';
-import { noZero, try2PX } from '../functions.mjs';
+import { try2PX } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
-
-const pick = (val: string) => {
-  const matches = [...val.matchAll(/([^\(]+)\(([^\)]+)\)/g)];
-
-  return [matches[0]?.[1], matches[0]?.[2]];
-};
+import { designTokenVars } from '../../tokens.mjs';
+import { functionParser } from '../../index.mjs';
 
 const map: Record<string, { key: string; convertor: (val: string) => string }> =
   {
-    'blur': {
+    blur: {
       key: 'blur',
       convertor: try2PX,
     },
-    'brightness': {
+    brightness: {
       key: 'brightness',
-      convertor: noZero,
+      convertor: removeSpace,
     },
-    'contrast': {
+    contrast: {
       key: 'contrast',
-      convertor: noZero,
+      convertor: removeSpace,
     },
     // multiple
     'drop-shadow': {
@@ -32,33 +28,33 @@ const map: Record<string, { key: string; convertor: (val: string) => string }> =
         return tokens.map((v) => removeSpace(v)).join('_');
       },
     },
-    'grayscale': {
+    grayscale: {
       key: 'grayscale',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
     'hue-rotate': {
       key: 'hue-rotate',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
-    'invert': {
+    invert: {
       key: 'invert',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
-    'opacity': {
+    opacity: {
       key: 'opacity',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
-    'saturate': {
+    saturate: {
       key: 'saturate',
-      convertor: noZero,
+      convertor: removeSpace,
     },
-    'sepia': {
+    sepia: {
       key: 'sepia',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
-    'url': {
+    url: {
       key: 'url',
-      convertor: (v: string) => v,
+      convertor: removeSpace,
     },
   };
 
@@ -74,7 +70,7 @@ export function filter([key, value]: [string, string]) {
   const unresolved: string[] = [];
 
   tokens.forEach((token) => {
-    const [k, v] = pick(token);
+    const [k, v] = functionParser(token);
 
     if (!k || !v) return;
 
@@ -86,8 +82,9 @@ export function filter([key, value]: [string, string]) {
 
     const config = map[k];
 
+    const convertedVal = config.convertor(v);
     const { tailwind, useful } = getTailwindBy({
-      [key]: `${config.key}(${config.convertor(v)})`,
+      [key]: `${config.key}(${designTokenVars[convertedVal] ?? convertedVal})`,
     });
 
     if (!useful) {
@@ -105,13 +102,13 @@ export function filter([key, value]: [string, string]) {
 
   return twMerge(
     ...res,
-    `[filter:${unresolved
-      .map((token) => {
-        const [k, v] = pick(token);
-        const { convertor } = map[k];
+    ...unresolved.map((token) => {
+      const [k, v] = functionParser(token);
 
-        return `${k}(${convertor(v)})`;
-      })
-      .join('_')}]`,
+      if (!k || !v) return;
+      const { convertor } = map[k];
+
+      return `${k}-[${convertor(v)}]`;
+    }),
   );
 }

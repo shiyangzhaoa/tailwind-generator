@@ -1,4 +1,4 @@
-import { boxShadow } from "../../../src/transform/rules/box-shadow.mjs";
+import { boxShadow } from '../../../src/transform/rules/box-shadow.mjs';
 
 describe('margin rule', () => {
   test('not match', () => {
@@ -6,7 +6,9 @@ describe('margin rule', () => {
   });
 
   test('base', () => {
-    expect(boxShadow(['box-shadow', '0 1px 2px 0 rgb(0, 0, 0, 0.05)'])).toBe('shadow-[0_1px_2px_0_rgb(0,0,0,0.05)]');
+    expect(boxShadow(['box-shadow', '0 1px 2px 0 rgb(0, 0, 0, 0.05)'])).toBe(
+      'shadow-[0_1px_2px_0_rgb(0,0,0,0.05)]',
+    );
   });
 
   test('unset', () => {
@@ -23,14 +25,21 @@ describe('margin rule', () => {
     // expect(mockExit).toHaveBeenCalledWith(1);
     // mockExit.mockRestore();
 
-    expect(boxShadow(['box-shadow', 'xxx'])).toBe(false)
+    expect(boxShadow(['box-shadow', 'xxx'])).toBe(false);
   });
 
   test('variable', () => {
-    expect(boxShadow(['box-shadow', '0 1px 2px 0 var(--color, #ccc)'])).toBe('shadow-[0_1px_2px_0_#ccc]');
+    expect(boxShadow(['box-shadow', '0 1px 2px 0 var(--color, #ccc)'])).toBe(
+      'shadow-[0_1px_2px_0_#ccc]',
+    );
   });
 
   test('variables', () => {
-    expect(boxShadow(['box-shadow', '0 1px var(--length, 10px) 0 var(--color, #ccc)'])).toBe('shadow-[0_1px_10px_0_#ccc]');
+    expect(
+      boxShadow([
+        'box-shadow',
+        '0 1px var(--length, 10px) 0 var(--color, #ccc)',
+      ]),
+    ).toBe('shadow-[0_1px_10px_0_#ccc]');
   });
-})
+});

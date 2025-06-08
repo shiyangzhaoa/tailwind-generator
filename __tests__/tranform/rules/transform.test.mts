@@ -10,12 +10,12 @@ describe('transform', () => {
   });
 
   test('scale(0.7)', () => {
-    expect(transform(['transform', 'scale(0.7)'])).toBe('scale-[0.7]');
+    expect(transform(['transform', 'scale(0.7)'])).toBe('scale-70');
   });
 
   test('scale(1.3, 0.4)', () => {
     expect(transform(['transform', 'scale(1.3, 0.4)'])).toBe(
-      'scale-x-[1.3] scale-y-[.4]',
+      'scale-[1.3,_0.4]',
     );
   });
 
@@ -24,12 +24,12 @@ describe('transform', () => {
   });
 
   test('rotate arbitrary', () => {
-    expect(transform(['transform', 'rotate(11deg)'])).toBe('rotate-[11deg]');
+    expect(transform(['transform', 'rotate(11deg)'])).toBe('rotate-11');
   });
 
   test('translate', () => {
     expect(transform(['transform', 'translateY(50%)'])).toContain(
-      'translate-y-2/4',
+      'translate-y-[50%]',
     );
   });
 

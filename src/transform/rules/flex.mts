@@ -1,4 +1,5 @@
 import { getTailwindBy } from '../../utils/index.mjs';
+import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function flex([key, value]: [string, string]) {
   if (key !== 'flex') {
@@ -13,5 +14,5 @@ export function flex([key, value]: [string, string]) {
     return tailwind.join(' ');
   }
 
-  return `flex-[${value.split(' ').join('_')}]`;
+  return toTailwindClass('flex', mergeMultiAttr(value));
 }

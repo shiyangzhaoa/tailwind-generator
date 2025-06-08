@@ -10,8 +10,8 @@ export function transitionProperty([key, value]: [string, string]) {
   }
 
   const { tailwind, useful } = getTailwindBy({
-    'transition-duration': '150ms',
-    'transition-timing-function': 'cubic-bezier(0.4, 0, 0.2, 1)',
+    'transition-duration': 'var(--default-transition-duration)',
+    'transition-timing-function': 'var(--default-transition-timing-function)',
     'transition-property': value,
   });
 

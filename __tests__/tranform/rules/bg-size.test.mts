@@ -1,4 +1,4 @@
-import { bgSize } from "../../../src/transform/rules/bg-size.mjs";
+import { bgSize } from '../../../src/transform/rules/bg-size.mjs';
 
 describe('background size', () => {
   test('not match', () => {
@@ -10,6 +10,8 @@ describe('background size', () => {
   });
 
   test('arbitrary value', () => {
-    expect(bgSize(['background-size', '200px 100px'])).toBe('bg-[length:200px_100px]');
+    expect(bgSize(['background-size', '200px 100px'])).toBe(
+      'bg-size-[200px_100px]',
+    );
   });
-})
+});

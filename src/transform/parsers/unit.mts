@@ -1,14 +1,14 @@
 import { varParser } from './var.mjs';
 import { context } from '../context.mjs';
-import { assertNever } from '../../utils/index.mjs';
+import { assertNever, removeSpace } from '../../utils/index.mjs';
 import { isCSSFunc, isVAR } from '../../utils/validator.mjs';
 
 export function unitProcess(
   value: string,
-  { model }: { model: 'color' | 'length' | 'var' },
+  { model }: { model: 'length' | 'var' },
 ) {
   if (isCSSFunc(value)) {
-    return value.replaceAll(/\s/g, '');
+    return removeSpace(value);
   }
 
   if (isVAR(value)) {
@@ -19,7 +19,7 @@ export function unitProcess(
     }
 
     for (let i = 0, l = keys.length; i < l; i++) {
-      const key = keys[i];
+      const key = `--${keys[i]}`;
 
       const val = context.varMap[key];
 
@@ -33,12 +33,10 @@ export function unitProcess(
     const key = keys[0];
 
     switch (model) {
-      case 'color':
-        return `color:var(--${key})`;
+      case 'var':
+        return `--${key}`;
       case 'length':
         return `length:var(--${key})`;
-      case 'var':
-        return key;
       default:
         assertNever(model);
         return '';

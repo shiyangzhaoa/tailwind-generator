@@ -4,7 +4,7 @@ import { try2PX } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
 import { getTailwindBy } from '../../utils/index.mjs';
 import { error } from 'console';
-import { isPercentage } from '../../utils/validator.mjs';
+import { isPercentage, isVARValue } from '../../utils/validator.mjs';
 
 const map: Record<string, string> = {
   border: 'rounded',
@@ -32,22 +32,22 @@ export function border([key, value]: [string, string]) {
     styleVal = tokens[0];
     _style = getTailwindBy({ 'border-style': styleVal }).tailwind.join(' ');
   } else if (tokens.length === 2) {
-    const isFirstPercentage = isPercentage(try2PX(tokens[0]));
-    _width = sizing([
-      `${[key]}-width`,
-      try2PX(tokens[isFirstPercentage ? 0 : 1]),
-    ]);
-    styleVal = tokens[isFirstPercentage ? 1 : 0];
+    const isFirstWidth = isBorderWidth(try2PX(tokens[0]));
+    _width = sizing(
+      [`${[key]}-width`, try2PX(tokens[isFirstWidth ? 0 : 1])],
+      'px',
+    );
+    styleVal = tokens[isFirstWidth ? 1 : 0];
     _style = getTailwindBy({
       [`border-style`]: styleVal,
     }).tailwind.join(' ');
   } else if (tokens.length === 3) {
-    const isFirstPercentage = isPercentage(try2PX(tokens[0]));
-    _width = sizing([
-      `${[key]}-width`,
-      try2PX(tokens[isFirstPercentage ? 0 : 1]),
-    ]);
-    styleVal = tokens[isFirstPercentage ? 1 : 0];
+    const isFirstWidth = isBorderWidth(try2PX(tokens[0]));
+    _width = sizing(
+      [`${[key]}-width`, try2PX(tokens[isFirstWidth ? 0 : 1])],
+      'px',
+    );
+    styleVal = tokens[isFirstWidth ? 1 : 0];
     _style = getTailwindBy({
       [`border-style`]: styleVal,
     }).tailwind.join(' ');
@@ -65,4 +65,12 @@ export function border([key, value]: [string, string]) {
   return [_width, _style || `border-[${styleVal}]`, _color]
     .filter(Boolean)
     .join(' ');
+}
+
+function isBorderWidth(val: string) {
+  if (['thin', 'medium', 'thick'].includes(val)) return true;
+
+  if (isPercentage(val)) return true;
+
+  if (isVARValue(val)) return true;
 }

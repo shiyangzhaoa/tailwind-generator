@@ -1,17 +1,17 @@
+import { designTokenVars } from '../../tokens.mjs';
 import { getTailwindBy } from '../../utils/index.mjs';
 import { isString } from '../../utils/validator.mjs';
-import { try2REM } from '../functions.mjs';
+import { try2REM, toTailwindClass } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
 
 const map: Record<
   string,
-  string | { key: string; insert?: boolean; model?: 'rem' | 'rem_no_zero' }
+  string | { key: string; insert?: boolean; model?: 'rem' }
 > = {
   'aspect-ratio': {
     key: 'aspect',
-    insert: false,
+    insert: true,
   },
-  'grid-template-columns': 'grid-cols',
   'grid-column': 'col',
   'grid-template-rows': 'grid-rows',
   'grid-row': 'row',
@@ -66,6 +66,14 @@ const map: Record<
     key: 'origin',
     insert: true,
   },
+  'perspective-origin': {
+    key: 'perspective-origin',
+    insert: true,
+  },
+  'rotate': {
+    key: 'rotate',
+    insert: true,
+  },
   cursor: {
     key: 'cursor',
     insert: true,
@@ -83,7 +91,6 @@ const map: Record<
 
 const convertorMap = {
   rem: try2REM,
-  rem_no_zero: (val: string) => try2REM(val, true),
 };
 
 const attrs = Object.keys(map);
@@ -100,8 +107,9 @@ export function arbitraryValues([key, value]: [string, string]) {
       ? (v: string) => v
       : convertorMap[config.model];
 
+  const convertedValue = convertor(value);
   const { tailwind, useful } = getTailwindBy({
-    [key]: convertor(value),
+    [key]: designTokenVars[convertedValue] ?? convertedValue,
   });
 
   if (!useful) {
@@ -109,11 +117,15 @@ export function arbitraryValues([key, value]: [string, string]) {
   }
 
   const prefix = isString(config) ? config : config.key;
-  const tokens = splitBySpaces(convertor(value)).map((item) => {
+  const tokens = splitBySpaces(convertedValue).map((item) => {
+    if (key === 'background-image') {
+      return item.replaceAll(/\s/g, '_');
+    }
+
     return item.replaceAll(/\s/g, '');
   });
   const realVal =
     isString(config) || config.insert ? tokens.join('_') : tokens.join('');
 
-  return `${prefix}-[${realVal}]`;
+  return toTailwindClass(prefix, realVal);
 }

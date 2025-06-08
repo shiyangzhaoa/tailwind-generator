@@ -1,5 +1,6 @@
+import { designTokenVars } from '../../tokens.mjs';
 import { getTailwindBy } from '../../utils/index.mjs';
-import { splitBySpaces } from '../parsers/split.mjs';
+import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function fontFamily([key, value]: [string, string]) {
   if (key !== 'font-family') {
@@ -7,16 +8,12 @@ export function fontFamily([key, value]: [string, string]) {
   }
 
   const { tailwind, useful } = getTailwindBy({
-    [key]: value,
+    [key]: designTokenVars[value] ?? value,
   });
 
   if (!useful) {
     return tailwind.join(' ');
   }
 
-  return `font-[${splitBySpaces(value)
-    .map((v) => {
-      return v.replaceAll(/\s/g, '_');
-    })
-    .join('')}]`;
+  return toTailwindClass('font', mergeMultiAttr(value));
 }

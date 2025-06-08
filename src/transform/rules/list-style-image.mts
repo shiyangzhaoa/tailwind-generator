@@ -1,4 +1,5 @@
 import { getTailwindBy } from '../../utils/index.mjs';
+import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function listStyleImage([key, value]: [string, string]) {
   if (key !== 'list-style-image') {
@@ -13,5 +14,5 @@ export function listStyleImage([key, value]: [string, string]) {
     return tailwind.join(' ');
   }
 
-  return `list-image-[${value.replaceAll(/[\'\"\s]/g, '')}]`;
+  return toTailwindClass('list-image', mergeMultiAttr(value));
 }

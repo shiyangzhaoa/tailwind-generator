@@ -1,7 +1,6 @@
-import { error } from 'console';
 import { splitBySpaces } from '../parsers/split.mjs';
 import { getTailwindBy } from '../../utils/index.mjs';
-import { try2REM, tryGetVal } from '../functions.mjs';
+import { try2REM, toTailwindClass } from '../functions.mjs';
 
 export function borderSpacing([key, value]: [string, string]) {
   if (key !== 'border-spacing') {
@@ -18,7 +17,7 @@ export function borderSpacing([key, value]: [string, string]) {
     x = tokens[0];
     y = tokens[1];
   } else {
-    error(`${key}: ${value} is invalid.`);
+    console.error(`${key}: ${value} is invalid.`);
 
     return false;
   }
@@ -35,11 +34,11 @@ export function borderSpacing([key, value]: [string, string]) {
   }
 
   if (xrem === yrem) {
-    return `border-spacing-[${tryGetVal(x)}]`;
+    return toTailwindClass('border-spacing', x, { mode: 'spacing' });
   }
 
   return [
-    `border-spacing-x-[${tryGetVal(x)}]`,
-    `border-spacing-y-[${tryGetVal(y)}]`,
+    toTailwindClass('border-spacing-x', x, { mode: 'spacing' }),
+    toTailwindClass('border-spacing-y', y, { mode: 'spacing' }),
   ].join(' ');
 }

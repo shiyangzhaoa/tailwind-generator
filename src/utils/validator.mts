@@ -24,6 +24,10 @@ export function isVAR(val: string) {
   return val.trim().startsWith('var');
 }
 
+export function isVARValue(val: string) {
+  return val.trim().startsWith('--');
+}
+
 // remove "var"
 const funcKeys = [
   'abs',
@@ -79,6 +83,10 @@ export function isColor(val: string) {
   } catch {
     return false;
   }
+}
+
+export function isOKLCH(val: string) {
+  return val.startsWith('oklch(');
 }
 
 export function isPercentage(val: string) {

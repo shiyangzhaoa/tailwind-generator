@@ -72,3 +72,36 @@ export function gen(
     failed,
   };
 }
+
+export const functionParser = (val: string) => {
+  const outerMatch = val.match(/^([^(]+)\((.*)\)$/);
+  if (!outerMatch) return [null, null];
+
+  const [, func, args] = outerMatch;
+
+  // Check if args contains nested function calls
+  const nestedFuncMatch = args.match(/^([^(]+)\(/);
+  if (nestedFuncMatch) {
+    // Handle nested functions by finding the matching closing parenthesis
+    let depth = 1;
+    let funcEnd = -1;
+    const startPos = nestedFuncMatch[0].length - 1; // Position after the opening parenthesis
+
+    for (let i = startPos + 1; i < args.length; i++) {
+      if (args[i] === '(') depth++;
+      if (args[i] === ')') depth--;
+      if (depth === 0) {
+        funcEnd = i;
+        break;
+      }
+    }
+
+    if (funcEnd !== -1) {
+      // Extract the complete nested function call
+      const nestedFunc = args.slice(0, funcEnd + 1);
+      return [func, nestedFunc];
+    }
+  }
+
+  return [func, args];
+};

@@ -2,9 +2,8 @@ import { twMerge } from 'tailwind-merge';
 
 import { getTailwindBy } from '../../utils/index.mjs';
 import { error } from '../../utils/logger.mjs';
-import { try2REM, tryGetVal } from '../functions.mjs';
+import { try2REM, toTailwindClass } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
-import { isVAR } from '../../utils/validator.mjs';
 
 const map: Record<string, string> = Object.fromEntries(
   ['', 'scroll-']
@@ -48,55 +47,32 @@ export function padding([key, value]: [string, string]) {
     return tailwind.length ? tailwind.join(' ') : `${map[key]}-[${value}]`;
   }
 
-  let obj: Record<string, string> = {};
   let valMap: Record<string, string> = {};
-  const getVal = (i: number) => (isVAR(list[i]) ? tryGetVal(list[i]) : list[i]);
 
   if (list.length === 1) {
-    obj = {
-      [`${prefix}padding`]: try2REM(list[0]),
-    };
     valMap = {
-      [`${prefix}padding`]: getVal(0),
+      [`${prefix}padding`]: list[0],
     };
   } else if (list.length === 2) {
-    obj = {
-      [`${prefix}padding-top`]: try2REM(list[0]),
-      [`${prefix}padding-right`]: try2REM(list[1]),
-      [`${prefix}padding-bottom`]: try2REM(list[0]),
-      [`${prefix}padding-left`]: try2REM(list[1]),
-    };
     valMap = {
-      [`${prefix}padding-top`]: getVal(0),
-      [`${prefix}padding-right`]: getVal(1),
-      [`${prefix}padding-bottom`]: getVal(0),
-      [`${prefix}padding-left`]: getVal(1),
+      [`${prefix}padding-top`]: list[0],
+      [`${prefix}padding-right`]: list[1],
+      [`${prefix}padding-bottom`]: list[0],
+      [`${prefix}padding-left`]: list[1],
     };
   } else if (list.length === 3) {
-    obj = {
-      [`${prefix}padding-top`]: try2REM(list[0]),
-      [`${prefix}padding-right`]: try2REM(list[1]),
-      [`${prefix}padding-bottom`]: try2REM(list[2]),
-      [`${prefix}padding-left`]: try2REM(list[1]),
-    };
     valMap = {
-      [`${prefix}padding-top`]: getVal(0),
-      [`${prefix}padding-right`]: getVal(1),
-      [`${prefix}padding-bottom`]: getVal(2),
-      [`${prefix}padding-left`]: getVal(1),
+      [`${prefix}padding-top`]: list[0],
+      [`${prefix}padding-right`]: list[1],
+      [`${prefix}padding-bottom`]: list[2],
+      [`${prefix}padding-left`]: list[1],
     };
   } else if (list.length === 4) {
-    obj = {
-      [`${prefix}padding-top`]: try2REM(list[0]),
-      [`${prefix}padding-right`]: try2REM(list[1]),
-      [`${prefix}padding-bottom`]: try2REM(list[2]),
-      [`${prefix}padding-left`]: try2REM(list[3]),
-    };
     valMap = {
-      [`${prefix}padding-top`]: getVal(0),
-      [`${prefix}padding-right`]: getVal(1),
-      [`${prefix}padding-bottom`]: getVal(2),
-      [`${prefix}padding-left`]: getVal(3),
+      [`${prefix}padding-top`]: list[0],
+      [`${prefix}padding-right`]: list[1],
+      [`${prefix}padding-bottom`]: list[2],
+      [`${prefix}padding-left`]: list[3],
     };
   } else {
     error(`${key}: ${value} is invalid.`);
@@ -104,12 +80,12 @@ export function padding([key, value]: [string, string]) {
     return false;
   }
 
-  const { tailwind, useful } = getTailwindBy(obj);
+  const { tailwind, useful } = getTailwindBy(valMap);
 
   return twMerge(
     ...tailwind,
     ...Object.entries(useful || {}).map(([k]) => {
-      return `${map[k]}-[${valMap[k]}]`;
+      return toTailwindClass(map[k], valMap[k], { mode: 'spacing' });
     }),
   );
 }

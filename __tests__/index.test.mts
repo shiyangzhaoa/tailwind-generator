@@ -13,12 +13,15 @@ describe('convert', () => {
           padding: '24px',
           width: '1152px',
           height: 'var(--var-height)',
+          'font-weight': '500',
         },
         {
-          'var-height': '12px',
+          '--var-height': '12px',
         },
       ).success,
-    ).toBe('items-start flex flex-col bg-white gap-[16px] p-6 w-[1152px] h-3');
+    ).toBe(
+      'items-start flex flex-col font-medium bg-white gap-[16px] p-6 w-6xl h-3',
+    );
   });
 
   test('camel case', () => {
@@ -32,7 +35,7 @@ describe('convert', () => {
         padding: '24px',
         width: '1152px',
       }).success,
-    ).toBe('items-start flex flex-col bg-white gap-[16px] p-6 w-[1152px]');
+    ).toBe('items-start flex flex-col bg-white gap-[16px] p-6 w-6xl');
   });
 
   test('var', () => {

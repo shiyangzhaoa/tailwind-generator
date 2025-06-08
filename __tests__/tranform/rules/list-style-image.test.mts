@@ -1,4 +1,4 @@
-import { listStyleImage } from "../../../src/transform/rules/list-style-image.mjs";
+import { listStyleImage } from '../../../src/transform/rules/list-style-image.mjs';
 
 describe('list-style-image', () => {
   test('not match', () => {
@@ -6,10 +6,50 @@ describe('list-style-image', () => {
   });
 
   test('base', () => {
-    expect(listStyleImage(['list-style-image', 'none'])).toBe('list-image-none');
+    expect(listStyleImage(['list-style-image', 'none'])).toBe(
+      'list-image-none',
+    );
   });
 
-  test('var', () => {
-    expect(listStyleImage(['list-style-image', 'url("/img/checkmark.png)'])).toBe('list-image-[url(/img/checkmark.png)]');
+  test('url with relative path', () => {
+    expect(listStyleImage(['list-style-image', 'url(/images/icon.png)'])).toBe(
+      'list-image-[url(/images/icon.png)]',
+    );
+  });
+
+  test('url with data URI', () => {
+    expect(
+      listStyleImage(['list-style-image', 'url(data:image/png;base64,ABC123)']),
+    ).toBe('list-image-[url(data:image/png;base64,ABC123)]');
+  });
+
+  test('url with CSS variable', () => {
+    expect(listStyleImage(['list-style-image', 'var(--custom-icon)'])).toBe(
+      'list-image-(--custom-icon)',
+    );
+  });
+
+  test('url with simple path', () => {
+    expect(listStyleImage(['list-style-image', 'url(icon.png)'])).toBe(
+      'list-image-[url(icon.png)]',
+    );
+  });
+
+  test('url with parent path', () => {
+    expect(
+      listStyleImage(['list-style-image', 'url(../images/icon.png)']),
+    ).toBe('list-image-[url(../images/icon.png)]');
+  });
+
+  test('invalid url', () => {
+    expect(listStyleImage(['list-style-image', 'url(invalid)'])).toBe(
+      'list-image-[url(invalid)]',
+    );
+  });
+
+  test('invalid value', () => {
+    expect(listStyleImage(['list-style-image', 'invalid'])).toBe(
+      'list-image-[invalid]',
+    );
   });
 });

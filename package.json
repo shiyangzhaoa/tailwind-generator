@@ -1,6 +1,6 @@
 {
   "name": "tailwind-generator",
-  "version": "0.0.1",
+  "version": "0.0.2-beta.1",
   "description": "This project was bootstrapped by CLI",
   "type": "module",
   "contributors": [
@@ -32,9 +32,10 @@
   "dependencies": {
     "chalk": "~4.1.2",
     "color": "^4.2.3",
+    "colorjs.io": "^0.5.2",
     "lodash.kebabcase": "^4.1.1",
     "postcss-value-parser": "^4.2.0",
-    "tailwind-merge": "^2.2.2"
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "@types/color": "^3.0.6",

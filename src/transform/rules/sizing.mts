@@ -1,38 +1,86 @@
+import { designTokenVars } from '../../tokens.mjs';
 import { getTailwindBy } from '../../utils/index.mjs';
 import { isString } from '../../utils/validator.mjs';
-import { try2PX, try2REM, tryGetVal } from '../functions.mjs';
+import { try2PX, try2REM, toTailwindClass } from '../functions.mjs';
 
 const map: Record<
   string,
-  string | { key: string; model: 'px' | 'rem' | 'rem_no_zero' }
+  string | { key: string; model: 'px' | 'rem'; spacing?: boolean }
 > = {
-  'width': 'w',
-  'min-width': 'min-w',
-  'max-width': 'max-w',
-  'height': 'h',
-  'min-height': 'min-h',
-  'max-height': 'max-h',
+  'width': {
+    key: 'w',
+    model: 'rem',
+    spacing: true,
+  },
+  'min-width': {
+    key: 'min-w',
+    model: 'rem',
+    spacing: true,
+  },
+  'max-width': {
+    key: 'max-w',
+    model: 'rem',
+    spacing: true,
+  },
+  'height': {
+    key: 'h',
+    model: 'rem',
+    spacing: true,
+  },
+  'min-height': {
+    key: 'min-h',
+    model: 'rem',
+    spacing: true,
+  },
+  'max-height': {
+    key: 'max-h',
+    model: 'rem',
+    spacing: true,
+  },
   'font-size': {
     key: 'text',
-    model: 'rem_no_zero',
+    model: 'rem',
   },
-  'font-weight': 'font',
   'letter-spacing': 'tracking',
   'line-height': {
     key: 'leading',
-    model: 'rem_no_zero',
+    model: 'rem',
   },
   'text-underline-offset': {
     key: 'underline-offset',
     model: 'px',
   },
   'vertical-align': 'align',
-  top: 'top',
-  right: 'right',
-  bottom: 'bottom',
-  left: 'left',
-  'inset-inline-start': 'start',
-  'inset-inline-end': 'end',
+  'top': {
+    key: 'top',
+    model: 'rem',
+    spacing: true,
+  },
+  'right': {
+    key: 'right',
+    model: 'rem',
+    spacing: true,
+  },
+  'bottom': {
+    key: 'bottom',
+    model: 'rem',
+    spacing: true,
+  },
+  'left': {
+    key: 'left',
+    model: 'rem',
+    spacing: true,
+  },
+  'inset-inline-start': {
+    key: 'start',
+    model: 'rem',
+    spacing: true,
+  },
+  'inset-inline-end': {
+    key: 'end',
+    model: 'rem',
+    spacing: true,
+  },
   'border-width': {
     key: 'border',
     model: 'px',
@@ -73,16 +121,23 @@ const map: Record<
     key: 'stroke',
     model: 'px',
   },
+  'perspective': {
+    key: 'perspective',
+    model: 'px',
+    spacing: false,
+  },
 };
 const convertorMap = {
   'px': try2PX,
   'rem': try2REM,
-  'rem_no_zero': (val: string) => try2REM(val, true),
 };
 
 const attrs = Object.keys(map);
 
-export function sizing([key, value]: [string, string]) {
+export function sizing(
+  [key, value]: [string, string],
+  mode?: 'spacing' | 'px',
+) {
   if (!attrs.includes(key)) {
     return false;
   }
@@ -91,9 +146,10 @@ export function sizing([key, value]: [string, string]) {
   const convertor = isString(config)
     ? convertorMap.rem
     : convertorMap[config.model];
+  const convertorValue = convertor(value);
 
   const { tailwind, useful } = getTailwindBy({
-    [key]: convertor(value),
+    [key]: designTokenVars[convertorValue] ?? convertorValue,
   });
 
   if (!useful) {
@@ -101,6 +157,8 @@ export function sizing([key, value]: [string, string]) {
   }
 
   const prefix = isString(config) ? config : config.key;
+  const spacingModel =
+    isString(config) || !config.spacing ? undefined : 'spacing';
 
-  return `${prefix}-[${tryGetVal(value)}]`;
+  return toTailwindClass(prefix, value, { mode: mode ?? spacingModel });
 }

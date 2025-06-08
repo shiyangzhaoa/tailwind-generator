@@ -2,9 +2,8 @@ import { twMerge } from 'tailwind-merge';
 
 import { getTailwindBy } from '../../utils/index.mjs';
 import { error } from '../../utils/logger.mjs';
-import { try2REM, tryGetVal } from '../functions.mjs';
+import { try2REM, toTailwindClass } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
-import { isVAR } from '../../utils/validator.mjs';
 
 const map: Record<string, string> = Object.fromEntries(
   ['', 'scroll-']
@@ -48,55 +47,32 @@ export function margin([key, value]: [string, string]) {
     return tailwind.length ? tailwind.join(' ') : `${map[key]}-[${value}]`;
   }
 
-  let obj: Record<string, string> = {};
   let valMap: Record<string, string> = {};
-  const getVal = (i: number) => (isVAR(list[i]) ? tryGetVal(list[i]) : list[i]);
 
   if (list.length === 1) {
-    obj = {
-      [`${prefix}margin`]: try2REM(list[0]),
-    };
     valMap = {
-      [`${prefix}margin`]: getVal(0),
+      [`${prefix}margin`]: list[0],
     };
   } else if (list.length === 2) {
-    obj = {
-      [`${prefix}margin-top`]: try2REM(list[0]),
-      [`${prefix}margin-right`]: try2REM(list[1]),
-      [`${prefix}margin-bottom`]: try2REM(list[0]),
-      [`${prefix}margin-left`]: try2REM(list[1]),
-    };
     valMap = {
-      [`${prefix}margin-top`]: getVal(0),
-      [`${prefix}margin-right`]: getVal(1),
-      [`${prefix}margin-bottom`]: getVal(0),
-      [`${prefix}margin-left`]: getVal(1),
+      [`${prefix}margin-top`]: list[0],
+      [`${prefix}margin-right`]: list[1],
+      [`${prefix}margin-bottom`]: list[0],
+      [`${prefix}margin-left`]: list[1],
     };
   } else if (list.length === 3) {
-    obj = {
-      [`${prefix}margin-top`]: try2REM(list[0]),
-      [`${prefix}margin-right`]: try2REM(list[1]),
-      [`${prefix}margin-bottom`]: try2REM(list[2]),
-      [`${prefix}margin-left`]: try2REM(list[1]),
-    };
     valMap = {
-      [`${prefix}margin-top`]: getVal(0),
-      [`${prefix}margin-right`]: getVal(1),
-      [`${prefix}margin-bottom`]: getVal(2),
-      [`${prefix}margin-left`]: getVal(1),
+      [`${prefix}margin-top`]: list[0],
+      [`${prefix}margin-right`]: list[1],
+      [`${prefix}margin-bottom`]: list[2],
+      [`${prefix}margin-left`]: list[1],
     };
   } else if (list.length === 4) {
-    obj = {
-      [`${prefix}margin-top`]: try2REM(list[0]),
-      [`${prefix}margin-right`]: try2REM(list[1]),
-      [`${prefix}margin-bottom`]: try2REM(list[2]),
-      [`${prefix}margin-left`]: try2REM(list[3]),
-    };
     valMap = {
-      [`${prefix}margin-top`]: getVal(0),
-      [`${prefix}margin-right`]: getVal(1),
-      [`${prefix}margin-bottom`]: getVal(2),
-      [`${prefix}margin-left`]: getVal(3),
+      [`${prefix}margin-top`]: list[0],
+      [`${prefix}margin-right`]: list[1],
+      [`${prefix}margin-bottom`]: list[2],
+      [`${prefix}margin-left`]: list[3],
     };
   } else {
     error(`${key}: ${value} is invalid.`);
@@ -104,12 +80,12 @@ export function margin([key, value]: [string, string]) {
     return false;
   }
 
-  const { tailwind, useful } = getTailwindBy(obj);
+  const { tailwind, useful } = getTailwindBy(valMap);
 
   return twMerge(
     ...tailwind,
     ...Object.entries(useful || {}).map(([k]) => {
-      return `${map[k]}-[${valMap[k]}]`;
+      return toTailwindClass(map[k], valMap[k], { mode: 'spacing' });
     }),
   );
 }

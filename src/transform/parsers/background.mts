@@ -1,8 +1,7 @@
 import valueParser from 'postcss-value-parser';
 import { splitBySpaces } from './split.mjs';
-import { isColor } from '../../utils/validator.mjs';
-import { removeSpace } from '../../utils/index.mjs';
-import { try2HEX } from '../functions.mjs';
+import { try2oklch } from '../functions.mjs';
+import { isColor, isOKLCH, isVAR } from '../../utils/validator.mjs';
 
 const POSITION_KEYWORD = ['top', 'bottom', 'left', 'right', 'center'];
 
@@ -33,7 +32,7 @@ export function backgroundParser(val: string) {
     size: [],
   };
 
-  const tokens = splitBySpaces(val).map((val) => removeSpace(val));
+  const tokens = splitBySpaces(val);
 
   const padding: string[] = [];
 
@@ -67,7 +66,12 @@ export function backgroundParser(val: string) {
       }
     }
 
-    if (isColor(try2HEX(token))) {
+    if (
+      isColor(try2oklch(token)) ||
+      isOKLCH(try2oklch(token)) ||
+      ['inherit', 'currentColor', 'transparent'].includes(token) ||
+      isVAR(token)
+    ) {
       background.color = token;
 
       return;
@@ -75,7 +79,7 @@ export function backgroundParser(val: string) {
 
     if (['scroll', 'fixed', 'local'].includes(token)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      background.attachment = token as any;
+      background.attachment = [token] as any;
 
       return;
     }

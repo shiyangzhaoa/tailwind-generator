@@ -1,5 +1,5 @@
 import { getTailwindBy } from '../../utils/index.mjs';
-import { tryGetVal } from '../functions.mjs';
+import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function bgSize([key, value]: [string, string]) {
   if (key !== 'background-size') {
@@ -14,7 +14,5 @@ export function bgSize([key, value]: [string, string]) {
     return tailwind.join(' ');
   }
 
-  const realVal = value.split(' ').join('_');
-
-  return `bg-[length:${tryGetVal(realVal)}]`;
+  return toTailwindClass('bg-size', mergeMultiAttr(value));
 }

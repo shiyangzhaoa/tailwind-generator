@@ -64,7 +64,7 @@ export const getTailwindBy = (rule: Record<string, string>) => {
 };
 
 export function removeSpace(val: string) {
-  return val.replace(/\s/g, '');
+  return val.replaceAll(/\s/g, '');
 }
 
 export function removeExtraSpace(val: string) {
@@ -72,4 +72,11 @@ export function removeExtraSpace(val: string) {
     .split(' ')
     .filter((v) => v !== ' ')
     .join(' ');
+}
+
+export function toFixedWithoutTrailingZeros(
+  num: number,
+  digits: number,
+): string {
+  return parseFloat(num.toFixed(digits)).toString();
 }

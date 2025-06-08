@@ -1,51 +1,38 @@
-import { getTailwindBy, removeSpace } from '../../utils/index.mjs';
+import { designTokenVars } from '../../tokens.mjs';
+import { getTailwindBy } from '../../utils/index.mjs';
 import { isString, isVAR } from '../../utils/validator.mjs';
-import { try2HEX, try2RGB } from '../functions.mjs';
+import { try2oklch, toTailwindClass } from '../functions.mjs';
 
-const map: Record<string, string | { key: string; model: 'hex' | 'rgb' }> = {
+const map: Record<string, string | { key: string }> = {
   color: {
     key: 'text',
-    model: 'rgb',
   },
   'text-decoration-color': {
     key: 'decoration',
-    model: 'hex',
   },
   'background-color': {
     key: 'bg',
-    model: 'rgb',
   },
   'border-color': {
     key: 'border',
-    model: 'rgb',
   },
   'outline-color': {
     key: 'outline',
-    model: 'hex',
   },
   'accent-color': {
     key: 'accent',
-    model: 'hex',
   },
   'caret-color': {
     key: 'caret',
-    model: 'hex',
   },
   // #region SVG
   fill: {
     key: 'fill',
-    model: 'hex',
   },
   stroke: {
     key: 'stroke',
-    model: 'hex',
   },
   // #endregion
-};
-
-const convertorMap = {
-  rgb: (val: string) => try2RGB(val).replaceAll(/\s/g, ''),
-  hex: try2HEX,
 };
 
 const attrs = Object.keys(map);
@@ -56,13 +43,10 @@ export function color([key, value]: [string, string]) {
   }
 
   const config = map[key];
-  const convertor = isString(config)
-    ? convertorMap.rgb
-    : convertorMap[config.model];
-  const realVal = convertor(value);
+  const oklch = try2oklch(value);
 
   const { tailwind, useful } = getTailwindBy({
-    [key]: realVal.replaceAll(',', ' '),
+    [key]: designTokenVars[oklch] ?? oklch,
   });
 
   if (!useful) {
@@ -71,12 +55,8 @@ export function color([key, value]: [string, string]) {
 
   const prefix = isString(config) ? config : config.key;
 
-  return `${prefix}-[${
-    isVAR(value)
-      ? realVal
-      : value
-          .split(/[\s\/]/)
-          .filter(Boolean)
-          .join(',')
-  }]`;
+  return toTailwindClass(
+    prefix,
+    isVAR(value) ? value.replaceAll(/\s/g, '') : value.replaceAll(/\s/g, '_'),
+  );
 }

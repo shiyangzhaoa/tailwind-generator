@@ -6,7 +6,11 @@ describe('color', () => {
   });
 
   test('text color', () => {
-    expect(color(['color', 'rgb(255, 255, 255)'])).toBe('text-white');
+    expect(color(['color', 'oklch(97.1% 0.013 17.38)'])).toBe('text-red-50');
+  });
+
+  test('text color rgba', () => {
+    expect(color(['color', 'rgba(255, 255, 255, 0.8)'])).toBe('text-white');
   });
 
   test('text color var', () => {
@@ -14,7 +18,7 @@ describe('color', () => {
   });
 
   test('text color var cus', () => {
-    expect(color(['color', 'var(--white)'])).toBe('text-[color:var(--white)]');
+    expect(color(['color', 'var(--white)'])).toBe('text-(--white)');
   });
 
   test('text color arbitrary', () => {
@@ -40,13 +44,15 @@ describe('color', () => {
   });
 
   test('background-color', () => {
-    expect(color(['background-color', '#FECDD3'])).toBe('bg-rose-200');
+    expect(color(['background-color', 'oklch(89.2% 0.058 10.001)'])).toBe(
+      'bg-rose-200',
+    );
   });
 
   test('text color var', () => {
-    expect(color(['background-color', 'var(--test, #FECDD3)'])).toBe(
-      'bg-rose-200',
-    );
+    expect(
+      color(['background-color', 'var(--test, oklch(89.2% 0.058 10.001))']),
+    ).toBe('bg-rose-200');
   });
 
   test('text color arbitrary', () => {
@@ -54,14 +60,20 @@ describe('color', () => {
   });
 
   test('border-color', () => {
-    expect(color(['border-color', '#FECDD3'])).toBe('border-rose-200');
+    expect(color(['border-color', 'oklch(89.2% 0.058 10.001)'])).toBe(
+      'border-rose-200',
+    );
   });
 
   test('accent-color', () => {
-    expect(color(['accent-color', '#FECDD3'])).toBe('accent-rose-200');
+    expect(color(['accent-color', 'oklch(89.2% 0.058 10.001)'])).toBe(
+      'accent-rose-200',
+    );
   });
 
   test('caret-color', () => {
-    expect(color(['caret-color', '#FECDD3'])).toBe('caret-rose-200');
+    expect(color(['caret-color', 'oklch(89.2% 0.058 10.001)'])).toBe(
+      'caret-rose-200',
+    );
   });
 });

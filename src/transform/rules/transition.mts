@@ -1,4 +1,4 @@
-import { splitByCommas } from '../parsers/split.mjs';
+import { splitByCommas, splitBySpaces } from '../parsers/split.mjs';
 
 export function transition([key, value]: [string, string]) {
   if (key !== 'transition') {
@@ -9,7 +9,7 @@ export function transition([key, value]: [string, string]) {
 
   const realVal = list
     .map((item) => {
-      return `${item.split(' ').join(',')}`;
+      return `${splitBySpaces(item).join(',')}`;
     })
     .join('_');
 

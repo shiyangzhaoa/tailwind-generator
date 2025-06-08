@@ -6,7 +6,9 @@ describe('padding rule', () => {
   });
 
   test('base', () => {
-    expect(padding(['padding', '13px 12px 1px'])).toBe('pb-px px-3 pt-[13px]');
+    expect(padding(['padding', '13px 12px 1px'])).toBe(
+      'pb-px pt-[13px] pr-3 pl-3',
+    );
   });
 
   test('1px', () => {
@@ -26,7 +28,7 @@ describe('padding rule', () => {
   });
 
   test('variable', () => {
-    expect(padding(['padding', 'var(--test)'])).toBe('p-[length:var(--test)]');
+    expect(padding(['padding', 'var(--test)'])).toBe('p-(--test)');
   });
 
   test('variable deep', () => {
@@ -36,7 +38,7 @@ describe('padding rule', () => {
   });
 
   test('scroll padding', () => {
-    expect(padding(['scroll-padding', '1px'])).toBe('scroll-p-px');
+    expect(padding(['scroll-padding', '1px'])).toBe('scroll-p-[1px]');
   });
 
   test('scroll padding arbitrary', () => {
