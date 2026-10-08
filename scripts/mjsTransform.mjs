@@ -1,46 +1,46 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/**
- * This file is used to change cjs/** files from .js to .mjs, and update the import source.
- */
-// @ts-check
-// TODO: https://github.com/nodejs/cjs-module-lexer/issues/2 require 不好做静态分析，先处理文件，再 build
+/** Prepare CommonJS sources, including type-only imports and re-exports. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { init, parse } from 'es-module-lexer';
+import ts from 'typescript';
 import { sync } from 'glob';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-async function main() {
-  fs.cpSync(
-    path.resolve(__dirname, '../src'),
-    path.resolve(__dirname, '../copy'),
-    { recursive: true },
-  );
-
-  console.log('Convert copy/**/*.mjs to copy/**/*.cjs');
-  await init;
-  sync(path.resolve(__dirname, '../copy/**/*.mts')).forEach((file) => {
-    const source = fs.readFileSync(file, 'utf8');
-    const [imports] = parse(source);
-    const sb = source.split('');
-    imports
-      .filter((d) => d.n?.startsWith('./') || d.n?.startsWith('../'))
-      .reverse()
-      .forEach((d) => {
-        sb.splice(d.s, d.e - d.s, `${d.n?.replace('.mjs', '')}.cjs`);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const destination = path.join(root, 'copy');
+fs.rmSync(destination, { recursive: true, force: true });
+fs.cpSync(path.join(root, 'src'), destination, { recursive: true });
+for (const file of sync(path.join(destination, '**/*.mts'))) {
+  const source = fs.readFileSync(file, 'utf8');
+  const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+  const edits = [];
+  function visit(node) {
+    const specifier =
+      ts.isImportDeclaration(node) || ts.isExportDeclaration(node)
+        ? node.moduleSpecifier
+        : ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)
+          ? node.argument.literal
+          : ts.isCallExpression(node) &&
+              node.expression.kind === ts.SyntaxKind.ImportKeyword
+            ? node.arguments[0]
+            : undefined;
+    if (
+      specifier &&
+      ts.isStringLiteral(specifier) &&
+      /^\.\.?\//.test(specifier.text)
+    ) {
+      edits.push({
+        start: specifier.getStart(ast) + 1,
+        end: specifier.end - 1,
+        text: specifier.text.replace(/\.mjs$/, '.cjs'),
       });
-    const targetFilename = file.replace(/\.mts$/, '.cts');
-    fs.writeFile(targetFilename, sb.join(''), () => {
-      try {
-        fs.unlinkSync(file);
-      } catch (e) {
-        console.error(`Remove file (${file}) failed ❌`);
-        console.error(e);
-      }
-    });
-  });
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
+  let output = source;
+  for (const edit of edits.sort((a, b) => b.start - a.start))
+    output = output.slice(0, edit.start) + edit.text + output.slice(edit.end);
+  fs.writeFileSync(file.replace(/\.mts$/, '.cts'), output);
+  fs.unlinkSync(file);
 }
-
-main();
+console.log('Prepared CommonJS sources');

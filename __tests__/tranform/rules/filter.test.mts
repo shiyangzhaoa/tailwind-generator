@@ -1,38 +1,33 @@
-import { filter } from '../../../src/transform/rules/filter.mjs';
+import { compile } from 'tailwindcss';
+import { filter as convert } from '../../../src/transform/rules/filter.mjs';
+import { parseValue } from '../../../src/core/value.mjs';
 
-describe('filter', () => {
-  test('not match', () => {
-    expect(filter(['margin', '1'])).toBe(false);
+const fixtures: [string, string][] = [
+  ['filter', 'blur(4px)'],
+  ['filter', 'blur(17px)'],
+  ['filter', 'brightness(0.4)'],
+  ['filter', 'contrast(200%)'],
+  ['filter', 'drop-shadow(16px 16px 20px blue)'],
+  [
+    'filter',
+    'drop-shadow(3px 3px red) sepia(100%) drop-shadow(-3px -3px blue)',
+  ],
+];
+
+describe('filter: whole declaration', () => {
+  test('does not handle unrelated properties', () => {
+    expect(convert(['unrelated', '12px'])).toBe(false);
   });
-
-  test('blur', () => {
-    expect(filter(['filter', 'blur(4px)'])).toBe('blur-xs');
-  });
-
-  test('blur arbitrary', () => {
-    expect(filter(['filter', 'blur(17px)'])).toBe('blur-[17px]');
-  });
-
-  test('brightness', () => {
-    expect(filter(['filter', 'brightness(0.4)'])).toBe('brightness-[0.4]');
-  });
-
-  test('contrast', () => {
-    expect(filter(['filter', 'contrast(200%)'])).toBe('contrast-[200%]');
-  });
-
-  test('drop-shadow', () => {
-    expect(filter(['filter', 'drop-shadow(16px 16px 20px blue)'])).toBe(
-      'drop-shadow-[16px_16px_20px_blue]',
-    );
-  });
-
-  test('multiple', () => {
-    expect(
-      filter([
-        'filter',
-        'drop-shadow(3px 3px red) sepia(100%) drop-shadow(-3px -3px blue)',
-      ]),
-    ).toBe('sepia drop-shadow-[-3px_-3px_blue]');
+  test.each(fixtures)('%s: %s', async (property, value) => {
+    if (!parseValue(value).valid) {
+      expect(convert([property, value])).toBe(false);
+      return;
+    }
+    const result = convert([property, value]);
+    expect(typeof result).toBe('string');
+    const compiler = await compile('@tailwind utilities;');
+    const css = compiler.build([result as string]);
+    // The compiler must retain every component, including function order.
+    expect(css).toContain(property + ': ' + value.trim() + ';');
   });
 });

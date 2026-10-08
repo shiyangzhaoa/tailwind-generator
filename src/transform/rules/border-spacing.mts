@@ -17,8 +17,6 @@ export function borderSpacing([key, value]: [string, string]) {
     x = tokens[0];
     y = tokens[1];
   } else {
-    console.error(`${key}: ${value} is invalid.`);
-
     return false;
   }
 

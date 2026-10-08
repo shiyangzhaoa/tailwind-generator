@@ -41,6 +41,7 @@ const map: Record<
     key: 'text',
     model: 'rem',
   },
+  'font-weight': 'font',
   'letter-spacing': 'tracking',
   'line-height': {
     key: 'leading',
@@ -132,13 +133,13 @@ const convertorMap = {
   'rem': try2REM,
 };
 
-const attrs = Object.keys(map);
+export const properties = Object.keys(map);
 
 export function sizing(
   [key, value]: [string, string],
   mode?: 'spacing' | 'px',
 ) {
-  if (!attrs.includes(key)) {
+  if (!properties.includes(key)) {
     return false;
   }
 

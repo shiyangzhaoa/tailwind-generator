@@ -35,10 +35,10 @@ const map: Record<string, string | { key: string }> = {
   // #endregion
 };
 
-const attrs = Object.keys(map);
+export const properties = Object.keys(map);
 
 export function color([key, value]: [string, string]) {
-  if (!attrs.includes(key)) {
+  if (!properties.includes(key)) {
     return false;
   }
 

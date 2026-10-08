@@ -1,25 +1,27 @@
-import { transitionProperty } from '../../../src/transform/rules/transition-property.mjs';
+import { compile } from 'tailwindcss';
+import { transitionProperty as convert } from '../../../src/transform/rules/transition-property.mjs';
+import { parseValue } from '../../../src/core/value.mjs';
 
-describe('transition-property', () => {
-  test('not match', () => {
-    expect(transitionProperty(['margin-left', '12px'])).toBe(false);
+const fixtures: [string, string][] = [
+  ['transition-property', 'none'],
+  ['transition-property', 'all'],
+  ['transition-property', 'width, height'],
+];
+
+describe('transition-property: whole declaration', () => {
+  test('does not handle unrelated properties', () => {
+    expect(convert(['unrelated', '12px'])).toBe(false);
   });
-
-  test('transition-none', () => {
-    expect(transitionProperty(['transition-property', 'none'])).toBe(
-      'transition-none',
-    );
-  });
-
-  test('transition-all', () => {
-    expect(transitionProperty(['transition-property', 'all'])).toBe(
-      'transition-all',
-    );
-  });
-
-  test('transition-all arbitrary', () => {
-    expect(transitionProperty(['transition-property', 'width, height'])).toBe(
-      'transition-[width,height]',
-    );
+  test.each(fixtures)('%s: %s', async (property, value) => {
+    if (!parseValue(value).valid) {
+      expect(convert([property, value])).toBe(false);
+      return;
+    }
+    const result = convert([property, value]);
+    expect(typeof result).toBe('string');
+    const compiler = await compile('@tailwind utilities;');
+    const css = compiler.build([result as string]);
+    // The compiler must retain every component, including function order.
+    expect(css).toContain(property + ': ' + value.trim() + ';');
   });
 });

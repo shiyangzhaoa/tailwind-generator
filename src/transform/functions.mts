@@ -92,6 +92,9 @@ export function try2oklch(val: string) {
 
   try {
     const colorjs = new ColorJS(realVal);
+    // Translucent colors must not match opaque theme tokens.
+    if (Number(colorjs.alpha) !== 1) return realVal;
+
     const srgb = colorjs.to('srgb');
 
     const rgbArr = srgb.coords.map((coord) => Math.round(coord * 255));
@@ -107,8 +110,7 @@ export function try2oklch(val: string) {
     const cValue = c < 1e-10 ? 0 : c;
 
     return `oklch(${toFixedWithoutTrailingZeros(l, 3)} ${toFixedWithoutTrailingZeros(cValue, 3)} ${toFixedWithoutTrailingZeros(hValue, 3)})`;
-  } catch (err) {
-    console.error(`try2oklch: ${err}`);
+  } catch {
     return realVal;
   }
 }
@@ -179,7 +181,11 @@ export function toTailwindClass(
   }
 
   if (opt?.mode === 'number') {
-    const number = +tryGetNumber(varVal);
+    // Numeric utilities use degrees for angles; retain all other units.
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:deg)?$/.test(varVal)) {
+      return `${prefix}-[${varVal}]`;
+    }
+    const number = Number(varVal.replace(/deg$/, ''));
     if (!Number.isInteger(number)) return `${prefix}-[${varVal}]`;
     return number > 0
       ? `${prefix}-${number}`

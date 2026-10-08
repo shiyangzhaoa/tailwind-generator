@@ -11,11 +11,24 @@ jobs:
         with:
           node-version: 20
       - name: Install pnpm
-        run: npm install pnpm@8.15.5 -g
+        run: npm install pnpm@10.10.0 -g
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+      - name: Check generated mappings and TypeScript
+        run: |
+          npm run check:mappings
+          npm run verify:mappings
+          npm run typecheck
       - name: Run tests and collect coverage
         run: npm run test
+      - name: Build and verify published entry points
+        run: |
+          npm run build
+          npm run test:package
+      - name: Check browser equivalence
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          npm run test:browser
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:

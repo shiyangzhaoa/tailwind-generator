@@ -14,9 +14,14 @@
   "module": "esm/index.mjs",
   "exports": {
     ".": {
-      "import": "./esm/index.mjs",
-      "require": "./cjs/index.cjs",
-      "types": "./esm/index.d.mts"
+      "import": {
+        "types": "./esm/index.d.mts",
+        "default": "./esm/index.mjs"
+      },
+      "require": {
+        "types": "./cjs/index.d.cts",
+        "default": "./cjs/index.cjs"
+      }
     }
   },
   "sideEffects": false,
@@ -27,17 +32,27 @@
     "build:esm": "tsc -b ./tsconfig.json",
     "build:cjs": "node ./scripts/mjsTransform.mjs && tsc -b ./tsconfig.cjs.json",
     "test": "NODE_OPTIONS=\"--experimental-vm-modules  --no-warnings\" jest -c ./__tests__/jest.config.mjs --detectOpenHandles",
-    "start": "NODE_OPTIONS=\"--experimental-vm-modules  --no-warnings\"  jest -c ./__tests__/jest.config.mjs --watchAll --runInBand"
+    "start": "NODE_OPTIONS=\"--experimental-vm-modules  --no-warnings\"  jest -c ./__tests__/jest.config.mjs --watchAll --runInBand",
+    "generate:mappings": "node scripts/generate-mappings.mjs",
+    "check:mappings": "node scripts/generate-mappings.mjs --check",
+    "typecheck": "tsc --noEmit -p __tests__/tsconfig.json",
+    "test:browser": "playwright test",
+    "test:package": "node scripts/verify-package.mjs",
+    "benchmark": "node scripts/benchmark.mjs",
+    "verify:mappings": "node scripts/verify-mappings.mjs"
   },
   "dependencies": {
     "chalk": "~4.1.2",
     "color": "^4.2.3",
     "colorjs.io": "^0.5.2",
+    "csstype": "^3.1.3",
     "lodash.kebabcase": "^4.1.1",
     "postcss-value-parser": "^4.2.0",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@types/color": "^3.0.6",
     "@types/jest": "^29",
     "@types/lodash.kebabcase": "^4.1.9",
@@ -46,7 +61,6 @@
     "@typescript-eslint/parser": "^5.36.2",
     "cjs-module-lexer": "^1.2.3",
     "codecov": "^3.8.3",
-    "csstype": "^3.1.3",
     "es-module-lexer": "^1.5.0",
     "eslint": "8.49.0",
     "eslint-config-prettier": "^9.1.0",
@@ -58,8 +72,8 @@
     "node-notifier": "^10.0.1",
     "prettier": "^3.2.5",
     "rimraf": "3.0.2",
+    "tailwindcss": "4.1.18",
     "ts-jest": "^29",
-    "tslib": "^2.6.2",
     "typescript": "5.4.2"
   }
 }

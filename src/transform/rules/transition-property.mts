@@ -1,23 +1,7 @@
-import { getTailwindBy, removeSpace } from '../../utils/index.mjs';
+import { atomicRule, convertAtomic } from './atomic.mjs';
 
-export function transitionProperty([key, value]: [string, string]) {
-  if (key !== 'transition-property') {
-    return false;
-  }
-
-  if (value === 'none') {
-    return 'transition-none';
-  }
-
-  const { tailwind, useful } = getTailwindBy({
-    'transition-duration': 'var(--default-transition-duration)',
-    'transition-timing-function': 'var(--default-transition-timing-function)',
-    'transition-property': value,
-  });
-
-  if (useful) {
-    return `transition-[${removeSpace(value)}]`;
-  }
-
-  return tailwind.join(' ');
+export const properties = ['transition-property'];
+export const rule = atomicRule('transition-property', properties);
+export function transitionProperty(declaration: [string, string]) {
+  return convertAtomic(declaration, properties);
 }

@@ -1,41 +1,31 @@
-import { transform } from '../../../src/transform/rules/transform.mjs';
+import { compile } from 'tailwindcss';
+import { transform as convert } from '../../../src/transform/rules/transform.mjs';
+import { parseValue } from '../../../src/core/value.mjs';
 
-describe('transform', () => {
-  test('not match', () => {
-    expect(transform(['margin-left', '12px'])).toBe(false);
+const fixtures: [string, string][] = [
+  ['transform', 'scale(1)'],
+  ['transform', 'scale(0.7)'],
+  ['transform', 'scale(1.3, 0.4)'],
+  ['transform', 'rotate(1deg)'],
+  ['transform', 'rotate(11deg)'],
+  ['transform', 'translateY(50%)'],
+  ['transform', 'translateY(11px)'],
+];
+
+describe('transform: whole declaration', () => {
+  test('does not handle unrelated properties', () => {
+    expect(convert(['unrelated', '12px'])).toBe(false);
   });
-
-  test('scale(1)', () => {
-    expect(transform(['transform', 'scale(1)'])).toBe('scale-100');
-  });
-
-  test('scale(0.7)', () => {
-    expect(transform(['transform', 'scale(0.7)'])).toBe('scale-70');
-  });
-
-  test('scale(1.3, 0.4)', () => {
-    expect(transform(['transform', 'scale(1.3, 0.4)'])).toBe(
-      'scale-[1.3,_0.4]',
-    );
-  });
-
-  test('rotate', () => {
-    expect(transform(['transform', 'rotate(1deg)'])).toBe('rotate-1');
-  });
-
-  test('rotate arbitrary', () => {
-    expect(transform(['transform', 'rotate(11deg)'])).toBe('rotate-11');
-  });
-
-  test('translate', () => {
-    expect(transform(['transform', 'translateY(50%)'])).toContain(
-      'translate-y-[50%]',
-    );
-  });
-
-  test('translateY arbitrary', () => {
-    expect(transform(['transform', 'translateY(11px)'])).toContain(
-      'translate-y-[11px]',
-    );
+  test.each(fixtures)('%s: %s', async (property, value) => {
+    if (!parseValue(value).valid) {
+      expect(convert([property, value])).toBe(false);
+      return;
+    }
+    const result = convert([property, value]);
+    expect(typeof result).toBe('string');
+    const compiler = await compile('@tailwind utilities;');
+    const css = compiler.build([result as string]);
+    // The compiler must retain every component, including function order.
+    expect(css).toContain(property + ': ' + value.trim() + ';');
   });
 });

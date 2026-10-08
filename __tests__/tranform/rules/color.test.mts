@@ -10,7 +10,9 @@ describe('color', () => {
   });
 
   test('text color rgba', () => {
-    expect(color(['color', 'rgba(255, 255, 255, 0.8)'])).toBe('text-white');
+    expect(color(['color', 'rgba(255, 255, 255, 0.8)'])).toBe(
+      'text-[rgba(255,_255,_255,_0.8)]',
+    );
   });
 
   test('text color var', () => {

@@ -1,45 +1,29 @@
-import { boxShadow } from '../../../src/transform/rules/box-shadow.mjs';
+import { compile } from 'tailwindcss';
+import { boxShadow as convert } from '../../../src/transform/rules/box-shadow.mjs';
+import { parseValue } from '../../../src/core/value.mjs';
 
-describe('margin rule', () => {
-  test('not match', () => {
-    expect(boxShadow(['margin-left', '12px'])).toBe(false);
+const fixtures: [string, string][] = [
+  ['box-shadow', '0 1px 2px 0 rgb(0, 0, 0, 0.05)'],
+  ['box-shadow', 'unset'],
+  ['box-shadow', 'xxx'],
+  ['box-shadow', '0 1px 2px 0 var(--color, #ccc)'],
+  ['box-shadow', '0 1px var(--length, 10px) 0 var(--color, #ccc)'],
+];
+
+describe('box-shadow: whole declaration', () => {
+  test('does not handle unrelated properties', () => {
+    expect(convert(['unrelated', '12px'])).toBe(false);
   });
-
-  test('base', () => {
-    expect(boxShadow(['box-shadow', '0 1px 2px 0 rgb(0, 0, 0, 0.05)'])).toBe(
-      'shadow-[0_1px_2px_0_rgb(0,0,0,0.05)]',
-    );
-  });
-
-  test('unset', () => {
-    expect(boxShadow(['box-shadow', 'unset'])).toBe('shadow-none');
-  });
-
-  test('error', () => {
-    // const mockExit = jest.spyOn(process, 'exit')
-    //   .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
-
-    // expect(() => {
-    //   boxShadow(['box-shadow', 'xxx']);
-    // }).toThrow();
-    // expect(mockExit).toHaveBeenCalledWith(1);
-    // mockExit.mockRestore();
-
-    expect(boxShadow(['box-shadow', 'xxx'])).toBe(false);
-  });
-
-  test('variable', () => {
-    expect(boxShadow(['box-shadow', '0 1px 2px 0 var(--color, #ccc)'])).toBe(
-      'shadow-[0_1px_2px_0_#ccc]',
-    );
-  });
-
-  test('variables', () => {
-    expect(
-      boxShadow([
-        'box-shadow',
-        '0 1px var(--length, 10px) 0 var(--color, #ccc)',
-      ]),
-    ).toBe('shadow-[0_1px_10px_0_#ccc]');
+  test.each(fixtures)('%s: %s', async (property, value) => {
+    if (!parseValue(value).valid) {
+      expect(convert([property, value])).toBe(false);
+      return;
+    }
+    const result = convert([property, value]);
+    expect(typeof result).toBe('string');
+    const compiler = await compile('@tailwind utilities;');
+    const css = compiler.build([result as string]);
+    // The compiler must retain every component, including function order.
+    expect(css).toContain(property + ': ' + value.trim() + ';');
   });
 });

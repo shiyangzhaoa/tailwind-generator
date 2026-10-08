@@ -3,3 +3,7 @@ coverage
 esm
 cjs
 copy
+
+# Browser test artifacts
+test-results/
+playwright-report/

@@ -93,10 +93,10 @@ const convertorMap = {
   rem: try2REM,
 };
 
-const attrs = Object.keys(map);
+export const properties = Object.keys(map);
 
 export function arbitraryValues([key, value]: [string, string]) {
-  if (!attrs.includes(key)) {
+  if (!properties.includes(key)) {
     return false;
   }
 

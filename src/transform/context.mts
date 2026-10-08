@@ -1,9 +1,11 @@
-export interface Context {
-  unresolved_vars: string[];
-  varMap: Record<string, string>;
-}
+import type { ConversionContext, GeneratorOptions } from '../core/types.mjs';
 
-export const context: Context = {
-  unresolved_vars: [],
-  varMap: {},
-};
+export function createContext(
+  options: GeneratorOptions = {},
+  variables: Readonly<Record<string, string>> = {},
+): ConversionContext {
+  return Object.freeze({
+    mode: options.mode ?? 'utilities',
+    variables: Object.freeze({ ...options.variables, ...variables }),
+  });
+}

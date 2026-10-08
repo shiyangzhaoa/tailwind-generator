@@ -1,7 +1,6 @@
 import { twMerge } from 'tailwind-merge';
 
 import { getTailwindBy } from '../../utils/index.mjs';
-import { error } from '../../utils/logger.mjs';
 import { try2REM, toTailwindClass } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
 
@@ -21,10 +20,10 @@ const map: Record<string, string> = Object.fromEntries(
     .flat(1),
 );
 
-const attrs = Object.keys(map);
+export const properties = Object.keys(map);
 
 export function margin([key, value]: [string, string]) {
-  if (!attrs.includes(key)) {
+  if (!properties.includes(key)) {
     return false;
   }
 
@@ -35,8 +34,6 @@ export function margin([key, value]: [string, string]) {
 
   if (key !== `${prefix}margin`) {
     if (list.length !== 1) {
-      error(`${key}: ${value} is invalid.`);
-
       return false;
     }
 
@@ -75,8 +72,6 @@ export function margin([key, value]: [string, string]) {
       [`${prefix}margin-left`]: list[3],
     };
   } else {
-    error(`${key}: ${value} is invalid.`);
-
     return false;
   }
 

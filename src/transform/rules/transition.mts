@@ -1,17 +1,7 @@
-import { splitByCommas, splitBySpaces } from '../parsers/split.mjs';
+import { atomicRule, convertAtomic } from './atomic.mjs';
 
-export function transition([key, value]: [string, string]) {
-  if (key !== 'transition') {
-    return false;
-  }
-
-  const list = splitByCommas(value);
-
-  const realVal = list
-    .map((item) => {
-      return `${splitBySpaces(item).join(',')}`;
-    })
-    .join('_');
-
-  return `transition-[${realVal}]`;
+export const properties = ['transition'];
+export const rule = atomicRule('transition', properties);
+export function transition(declaration: [string, string]) {
+  return convertAtomic(declaration, properties);
 }
