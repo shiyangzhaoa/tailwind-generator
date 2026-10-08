@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up pinned Node.js and pnpm
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v5
       - name: Verify toolchain
         run: |
           node --version
@@ -44,7 +44,7 @@ jobs:
       - name: Upload coverage to Codecov
         # Releases call this workflow without secrets; pushes and PRs upload.
         if: inputs.coverage != 'skip'
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: shiyangzhaoa/tailwind-generator
@@ -57,9 +57,9 @@ jobs:
         node: ['20.19.0', '22.12.0']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up pinned Node.js and pnpm
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v5
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
