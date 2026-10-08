@@ -8,51 +8,20 @@ import { rule as filterRule } from './filter.mjs';
 import { rule as boxShadowRule } from './box-shadow.mjs';
 import { rule as borderRule } from './border.mjs';
 import { rule as backgroundRule } from './background.mjs';
-import {
-  arbitraryValues,
-  properties as arbitraryValuesProperties,
-} from './arbitrary-values.mjs';
-import { bgSize } from './bg-size.mjs';
-import { borderSpacing } from './border-spacing.mjs';
-import { color, properties as colorProperties } from './color.mjs';
-import { flexBasis } from './flex-basis.mjs';
-import { flex } from './flex.mjs';
-import { gridTemplateColumns } from './grid-template-columns.mjs';
-import { fontFamily } from './font-family.mjs';
-import { listStyleImage } from './list-style-image.mjs';
-import { boxSpacing } from './box-spacing.mjs';
-import { sizing, properties as sizingProperties } from './sizing.mjs';
+import { rule as arbitraryValuesRule } from './arbitrary-values.mjs';
+import { rule as bgSizeRule } from './bg-size.mjs';
+import { rule as borderSpacingRule } from './border-spacing.mjs';
+import { marginRule, paddingRule } from './box-spacing.mjs';
+import { rule as colorRule } from './color.mjs';
+import { rule as flexBasisRule } from './flex-basis.mjs';
+import { rule as flexRule } from './flex.mjs';
+import { rule as fontFamilyRule } from './font-family.mjs';
+import { rule as gridTemplateColumnsRule } from './grid-template-columns.mjs';
+import { rule as listStyleImageRule } from './list-style-image.mjs';
+import { rule as sizingRule } from './sizing.mjs';
 
 import type { Rule } from '../../core/types.mjs';
-import { arbitraryProperty } from '../../core/serialize.mjs';
 import { createRegistry } from '../../core/registry.mjs';
-
-function utilityRule(
-  name: string,
-  properties: readonly string[],
-  convert: (declaration: [string, string]) => string | false,
-): Rule {
-  return {
-    name,
-    properties,
-    convert(declaration) {
-      // Preserve syntax that legacy numeric/token optimizers cannot safely rewrite.
-      if (
-        /[\\_'"]|\/\*|\bvar\(/.test(declaration.value) ||
-        /^(inherit|initial|unset|revert|revert-layer)$/.test(declaration.value)
-      ) {
-        return {
-          status: 'converted',
-          classes: [arbitraryProperty(declaration.property, declaration.value)],
-        };
-      }
-      const classes = convert([declaration.property, declaration.value]);
-      return classes
-        ? { status: 'converted', classes: classes.split(' ') }
-        : { status: 'failed', reason: 'unsupported-value' };
-    },
-  };
-}
 
 // These declarations must remain atomic: splitting can change function order,
 // omit components, or lose the reset behavior of CSS shorthands.
@@ -74,24 +43,18 @@ export const atomicProperties = new Set(
 
 export const rules: readonly Rule[] = [
   ...atomicRules,
-  utilityRule('arbitrary-values', arbitraryValuesProperties, arbitraryValues),
-  utilityRule('background-size', ['background-size'], bgSize),
-  utilityRule('border-spacing', ['border-spacing'], borderSpacing),
-  utilityRule('color', colorProperties, color),
-  utilityRule('flex-basis', ['flex-basis'], flexBasis),
-  utilityRule('flex', ['flex'], flex),
-  utilityRule('font-family', ['font-family'], fontFamily),
-  utilityRule(
-    'grid-template-columns',
-    ['grid-template-columns'],
-    gridTemplateColumns,
-  ),
-  utilityRule('list-style-image', ['list-style-image'], listStyleImage),
-  ...(['margin', 'padding'] as const).map((name) => {
-    const { properties, convert } = boxSpacing(name);
-    return utilityRule(name, properties, convert);
-  }),
-  utilityRule('sizing', sizingProperties, sizing),
+  arbitraryValuesRule,
+  bgSizeRule,
+  borderSpacingRule,
+  colorRule,
+  flexBasisRule,
+  flexRule,
+  fontFamilyRule,
+  gridTemplateColumnsRule,
+  listStyleImageRule,
+  marginRule,
+  paddingRule,
+  sizingRule,
 ];
 
 export const ruleRegistry = createRegistry(rules);

@@ -1,18 +1,5 @@
-import { getTailwindBy } from '../../core/mappings.mjs';
-import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
+import { utilityRule } from './utility.mjs';
 
-export function listStyleImage([key, value]: [string, string]) {
-  if (key !== 'list-style-image') {
-    return false;
-  }
-
-  const { tailwind, useful } = getTailwindBy({
-    [key]: value,
-  });
-
-  if (!useful) {
-    return tailwind.join(' ');
-  }
-
-  return toTailwindClass('list-image', mergeMultiAttr(value));
-}
+export const rule = utilityRule('list-style-image', {
+  'list-style-image': { prefix: 'list-image' },
+});

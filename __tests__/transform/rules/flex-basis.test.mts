@@ -1,10 +1,6 @@
-import { flexBasis } from '../../../src/transform/rules/flex-basis.mjs';
+import { convertDeclaration as flexBasis } from '../../convert-declaration.mjs';
 
 describe('flex basis', () => {
-  test('not match', () => {
-    expect(flexBasis(['margin-left', '12px'])).toBe(false);
-  });
-
   test('base', () => {
     expect(flexBasis(['flex-basis', '256px'])).toBe('basis-3xs');
   });
@@ -57,7 +53,7 @@ describe('flex basis', () => {
 
   test('calc value', () => {
     expect(flexBasis(['flex-basis', 'calc(100% - 20px)'])).toBe(
-      'basis-[calc(100%-20px)]',
+      'basis-[calc(100%_-_20px)]',
     );
   });
 

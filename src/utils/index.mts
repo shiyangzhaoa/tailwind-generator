@@ -1,9 +1,3 @@
-export function assertNever(value: never) {
-  console.error('Unknown value', value);
-
-  throw Error('Not possible');
-}
-
 export function removeSpace(val: string) {
   return val.replaceAll(/\s/g, '');
 }

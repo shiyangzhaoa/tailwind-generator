@@ -1,10 +1,6 @@
-import { color } from '../../../src/transform/rules/color.mjs';
+import { convertDeclaration as color } from '../../convert-declaration.mjs';
 
 describe('color', () => {
-  test('not match', () => {
-    expect(color(['margin', '1'])).toBe(false);
-  });
-
   test('text color', () => {
     expect(color(['color', 'oklch(97.1% 0.013 17.38)'])).toBe('text-red-50');
   });

@@ -16,18 +16,19 @@ flowchart LR
 
 ## Module boundaries
 
-| Module                      | Responsibility                                                                                              |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `src/index.mts`             | Public entry points and exported types. Internal modules do not import it.                                  |
-| `src/core/input.mts`        | Property name hyphenation, numeric units, and `!important` extraction, following React's style conventions. |
-| `src/core/engine.mts`       | Coordinates parsing, mapping, rule dispatch, and diagnostics.                                               |
-| `src/core/types.mts`        | Declaration, context, rule result, and public result contracts.                                             |
-| `src/core/value.mts`        | Shared value parsing, boundary validation, function parsing, and variable resolution.                       |
-| `src/core/serialize.mts`    | Emits complete arbitrary properties, preserving quoted contents, literal underscores, and URL payloads.     |
-| `src/core/registry.mts`     | Builds the property-to-rule index and rejects duplicate registrations.                                      |
-| `src/core/mappings.mts`     | Builds exact-match candidate indexes from generated data.                                                   |
-| `src/transform/rules/`      | Property-specific utility optimizers and whole-declaration rules.                                           |
-| `src/transform/context.mts` | Creates immutable per-call variable/configuration snapshots.                                                |
+| Module                        | Responsibility                                                                                              |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/index.mts`               | Public entry points and exported types. Internal modules do not import it.                                  |
+| `src/core/input.mts`          | Property name hyphenation, numeric units, and `!important` extraction, following React's style conventions. |
+| `src/core/engine.mts`         | Coordinates parsing, mapping, rule dispatch, and diagnostics.                                               |
+| `src/core/types.mts`          | Declaration, context, rule result, and public result contracts.                                             |
+| `src/core/value.mts`          | Shared value parsing, boundary validation, function parsing, and variable resolution.                       |
+| `src/core/serialize.mts`      | Emits complete arbitrary properties, preserving quoted contents, literal underscores, and URL payloads.     |
+| `src/core/registry.mts`       | Builds the property-to-rule index and rejects duplicate registrations.                                      |
+| `src/core/mappings.mts`       | Builds exact-match candidate indexes from generated data.                                                   |
+| `src/transform/rules/`        | Declarative property rules; `utility.mts` holds the shared lookup and fallback steps.                       |
+| `src/transform/functions.mts` | Value normalizers used for theme lookup: px/rem conversion and colors to oklch.                             |
+| `src/transform/context.mts`   | Creates immutable per-call variable/configuration snapshots.                                                |
 
 ## Input normalization
 
@@ -51,9 +52,15 @@ type RuleResult =
   | { status: 'failed'; reason: 'unsupported-value' | 'invalid-value' };
 ```
 
-The registry selects a rule by property, so an `unmatched` result is unnecessary. Property support is derived from the same registrations and the exact-mapping index; there is no separately maintained support list. Existing small utility converters remain pure helpers behind this boundary. They cannot read invocation state.
+The registry selects a rule by property, so an `unmatched` result is unnecessary. Property support is derived from the same registrations and the exact-mapping index; there is no separately maintained support list.
 
-Add a property rule by declaring its properties, registering it once, and adding a public-entry regression and compiled CSS assertion. Duplicate registrations fail at initialization rather than silently depending on array order.
+Whole-declaration rules come from `atomicRule`. Every other rule comes from `utilityRule` in `src/transform/rules/utility.mts`, which declares one `Utility` per property and owns the shared steps:
+
+1. Look up an exact theme class, using the property's optional `normalize` (px → rem, color → oklch) and preferring the theme token form of the value. A match never rewrites the value, so it is tried first.
+2. Keep values with quotes, escapes, underscores, comments, unresolved `var()`, or global keywords as a whole declaration.
+3. Otherwise call the property's `fallback` with the original value. The default is an arbitrary value, encoded by `encodeArbitraryValue`; `spacing` emits whole multiples of the spacing scale such as `p-4`. A `hint` adds a Tailwind data type where Tailwind would otherwise misread a keyword, such as `font-[number:bolder]` instead of a font family.
+
+Rules cannot read invocation state. Add a property by declaring its `Utility`, registering the rule once, and adding a public-entry regression and compiled CSS assertion. Duplicate registrations fail at initialization rather than silently depending on array order.
 
 ## Completeness and optimization
 

@@ -1,18 +1,5 @@
-import { getTailwindBy } from '../../core/mappings.mjs';
-import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
+import { utilityRule } from './utility.mjs';
 
-export function bgSize([key, value]: [string, string]) {
-  if (key !== 'background-size') {
-    return false;
-  }
-
-  const { tailwind, useful } = getTailwindBy({
-    [key]: value,
-  });
-
-  if (!useful) {
-    return tailwind.join(' ');
-  }
-
-  return toTailwindClass('bg-size', mergeMultiAttr(value));
-}
+export const rule = utilityRule('background-size', {
+  'background-size': { prefix: 'bg-size' },
+});

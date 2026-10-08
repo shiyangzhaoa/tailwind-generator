@@ -1,10 +1,6 @@
-import { listStyleImage } from '../../../src/transform/rules/list-style-image.mjs';
+import { convertDeclaration as listStyleImage } from '../../convert-declaration.mjs';
 
 describe('list-style-image', () => {
-  test('not match', () => {
-    expect(listStyleImage(['margin-left', '12px'])).toBe(false);
-  });
-
   test('base', () => {
     expect(listStyleImage(['list-style-image', 'none'])).toBe(
       'list-image-none',

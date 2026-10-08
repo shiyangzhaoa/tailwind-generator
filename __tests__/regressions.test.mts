@@ -93,6 +93,23 @@ const compiledCases: [Parameters<typeof gen>[0], string[]][] = [
     { backdropFilter: 'url(filters.svg#filter) blur(4px)' },
     ['backdrop-filter: url(filters.svg#filter) blur(4px);'],
   ],
+  [{ borderTopLeftRadius: '3px' }, ['border-top-left-radius: 3px;']],
+  [{ borderTopRightRadius: '3px' }, ['border-top-right-radius: 3px;']],
+  [
+    { backgroundSize: 'calc(1px + 2px) auto' },
+    ['background-size: calc(1px + 2px) auto;'],
+  ],
+  [{ flex: 'calc(1 + 1) 1 0%' }, ['flex: calc(1 + 1) 1 0%;']],
+  // Keywords must not be inferred as a color or font family.
+  [{ fontWeight: 'bolder' }, ['font-weight: bolder;']],
+  [{ outlineWidth: 'medium' }, ['outline-width: medium;']],
+  [{ borderTopWidth: 'thin' }, ['border-top-width: thin;']],
+  [{ fontSize: 'larger' }, ['font-size: larger;']],
+  [{ strokeWidth: 'calc(1px + 2px)' }, ['stroke-width: calc(1px + 2px);']],
+  [
+    { backgroundPosition: 'left 10px top' },
+    ['background-position: left 10px top;'],
+  ],
 ];
 
 describe('Tailwind 4.1 compiled declarations', () => {

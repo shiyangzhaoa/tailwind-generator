@@ -1,10 +1,6 @@
-import { flex } from '../../../src/transform/rules/flex.mjs';
+import { convertDeclaration as flex } from '../../convert-declaration.mjs';
 
 describe('flex', () => {
-  test('not match', () => {
-    expect(flex(['margin', '1'])).toBe(false);
-  });
-
   test('base', () => {
     expect(flex(['flex', '1'])).toBe('flex-[1]');
   });
@@ -42,7 +38,9 @@ describe('flex', () => {
   });
 
   test('calc value', () => {
-    expect(flex(['flex', 'calc(100% - 20px)'])).toBe('flex-[calc(100%-20px)]');
+    expect(flex(['flex', 'calc(100% - 20px)'])).toBe(
+      'flex-[calc(100%_-_20px)]',
+    );
   });
 
   test('negative value', () => {

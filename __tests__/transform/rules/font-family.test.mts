@@ -1,10 +1,6 @@
-import { fontFamily } from '../../../src/transform/rules/font-family.mjs';
+import { convertDeclaration as fontFamily } from '../../convert-declaration.mjs';
 
 describe('font-family', () => {
-  test('not match', () => {
-    expect(fontFamily(['margin-left', '12px'])).toBe(false);
-  });
-
   test('base', () => {
     expect(
       fontFamily([

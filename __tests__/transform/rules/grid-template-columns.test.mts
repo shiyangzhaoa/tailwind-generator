@@ -1,4 +1,4 @@
-import { gridTemplateColumns } from '../../../src/transform/rules/grid-template-columns.mjs';
+import { convertDeclaration as gridTemplateColumns } from '../../convert-declaration.mjs';
 
 describe('grid-template-columns', () => {
   // 基础用例
@@ -40,7 +40,7 @@ describe('grid-template-columns', () => {
         'grid-template-columns',
         'repeat(5, minmax(1, 1fr))',
       ]),
-    ).toBe('grid-cols-[repeat(5,minmax(1,1fr))]');
+    ).toBe('grid-cols-[repeat(5,_minmax(1,_1fr))]');
   });
 
   test('grid-template-columns repeat with custom values', () => {
@@ -49,19 +49,13 @@ describe('grid-template-columns', () => {
         'grid-template-columns',
         'repeat(3, minmax(100px, 1fr))',
       ]),
-    ).toBe('grid-cols-[repeat(3,minmax(100px,1fr))]');
+    ).toBe('grid-cols-[repeat(3,_minmax(100px,_1fr))]');
   });
 
   // 无效输入
   test('grid-template-columns invalid input', () => {
     expect(gridTemplateColumns(['grid-template-columns', 'invalid'])).toBe(
       'grid-cols-[invalid]',
-    );
-  });
-
-  test('grid-template-columns empty value', () => {
-    expect(gridTemplateColumns(['grid-template-columns', ''])).toBe(
-      'grid-cols-[]',
     );
   });
 
@@ -72,7 +66,7 @@ describe('grid-template-columns', () => {
         'grid-template-columns',
         'repeat(auto-fit, minmax(200px, 1fr))',
       ]),
-    ).toBe('grid-cols-[repeat(auto-fit,minmax(200px,1fr))]');
+    ).toBe('grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))]');
   });
 
   test('grid-template-columns multiple columns', () => {

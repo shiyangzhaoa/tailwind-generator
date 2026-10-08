@@ -1,10 +1,6 @@
-import { borderSpacing } from '../../../src/transform/rules/border-spacing.mjs';
+import { convertDeclaration as borderSpacing } from '../../convert-declaration.mjs';
 
 describe('border-spacing', () => {
-  test('not match', () => {
-    expect(borderSpacing(['margin-left', '12px'])).toBe(false);
-  });
-
   test('base', () => {
     expect(borderSpacing(['border-spacing', '80px 5rem'])).toBe(
       'border-spacing-20',

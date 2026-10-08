@@ -1,10 +1,6 @@
-import { bgSize } from '../../../src/transform/rules/bg-size.mjs';
+import { convertDeclaration as bgSize } from '../../convert-declaration.mjs';
 
 describe('background size', () => {
-  test('not match', () => {
-    expect(bgSize(['margin-left', '12px'])).toBe(false);
-  });
-
   test('base', () => {
     expect(bgSize(['background-size', 'auto'])).toBe('bg-auto');
   });

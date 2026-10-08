@@ -1,10 +1,6 @@
-import { arbitraryValues } from '../../../src/transform/rules/arbitrary-values.mjs';
+import { convertDeclaration as arbitraryValues } from '../../convert-declaration.mjs';
 
 describe('arbitrary values', () => {
-  test('not match', () => {
-    expect(arbitraryValues(['margin-left', '12px'])).toBe(false);
-  });
-
   test('aspect-ratio', () => {
     expect(arbitraryValues(['aspect-ratio', '1 / 1'])).toBe('aspect-square');
   });
@@ -15,7 +11,7 @@ describe('arbitrary values', () => {
 
   test('aspect-ratio with calc', () => {
     expect(arbitraryValues(['aspect-ratio', 'calc(16 / 9)'])).toBe(
-      'aspect-[calc(16/9)]',
+      'aspect-[calc(16_/_9)]',
     );
   });
 
@@ -40,7 +36,7 @@ describe('arbitrary values', () => {
   test('background-position with calc', () => {
     expect(
       arbitraryValues(['background-position', 'calc(100% - 20px) center']),
-    ).toBe('bg-[calc(100%-20px)_center]');
+    ).toBe('bg-[calc(100%_-_20px)_center]');
   });
 
   test('background-image', () => {
@@ -55,7 +51,7 @@ describe('arbitrary values', () => {
   test('background-image arbitrary', () => {
     expect(
       arbitraryValues(['background-image', 'url("/img/hero-pattern.svg")']),
-    ).toBe('bg-[url("/img/hero-pattern.svg")]');
+    ).toBe('[background-image:url("/img/hero-pattern.svg")]');
   });
 
   test('background-image with multiple gradients', () => {
@@ -81,7 +77,7 @@ describe('arbitrary values', () => {
 
   test('border-radius with calc', () => {
     expect(arbitraryValues(['border-radius', 'calc(100% - 20px)'])).toBe(
-      'rounded-[calc(100%-20px)]',
+      'rounded-[calc(100%_-_20px)]',
     );
   });
 
@@ -93,7 +89,7 @@ describe('arbitrary values', () => {
 
   test('transform-origin with calc', () => {
     expect(arbitraryValues(['transform-origin', 'calc(100% - 20px) 50%'])).toBe(
-      'origin-[calc(100%-20px)_50%]',
+      'origin-[calc(100%_-_20px)_50%]',
     );
   });
 
@@ -122,13 +118,13 @@ describe('arbitrary values', () => {
 
   test('will-change arbitrary', () => {
     expect(arbitraryValues(['will-change', 'left, top'])).toBe(
-      'will-change-[left,top]',
+      'will-change-[left,_top]',
     );
   });
 
   test('will-change with transform', () => {
     expect(arbitraryValues(['will-change', 'transform, opacity'])).toBe(
-      'will-change-[transform,opacity]',
+      'will-change-[transform,_opacity]',
     );
   });
 
@@ -138,12 +134,12 @@ describe('arbitrary values', () => {
 
   test('z-index with calc', () => {
     expect(arbitraryValues(['z-index', 'calc(100 + 50)'])).toBe(
-      'z-[calc(100+50)]',
+      'z-[calc(100_+_50)]',
     );
   });
 
   test('handles special characters', () => {
-    expect(arbitraryValues(['content', '"\\2022"'])).toBe('content-["\\2022"]');
+    expect(arbitraryValues(['content', '"\\2022"'])).toBe('[content:"\\2022"]');
   });
 
   test('perspective-origin', () => {
@@ -173,7 +169,7 @@ describe('arbitrary values', () => {
   test('perspective-origin with calc', () => {
     expect(
       arbitraryValues(['perspective-origin', 'calc(50% - 10px) 100%']),
-    ).toBe('perspective-origin-[calc(50%-10px)_100%]');
+    ).toBe('perspective-origin-[calc(50%_-_10px)_100%]');
   });
 
   test('rotate with degrees', () => {
@@ -194,7 +190,7 @@ describe('arbitrary values', () => {
 
   test('rotate with calc', () => {
     expect(arbitraryValues(['rotate', 'calc(45deg + 10deg)'])).toBe(
-      'rotate-[calc(45deg+10deg)]',
+      'rotate-[calc(45deg_+_10deg)]',
     );
   });
 

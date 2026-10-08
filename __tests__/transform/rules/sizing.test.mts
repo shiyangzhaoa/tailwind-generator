@@ -1,10 +1,6 @@
-import { sizing } from '../../../src/transform/rules/sizing.mjs';
+import { convertDeclaration as sizing } from '../../convert-declaration.mjs';
 
 describe('sizing', () => {
-  test('not match', () => {
-    expect(sizing(['margin-left', '12px'])).toBe(false);
-  });
-
   test('max width', () => {
     expect(sizing(['max-width', '256px'])).toBe('max-w-3xs');
   });
