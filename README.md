@@ -7,7 +7,7 @@ Convert CSS declaration objects into Tailwind CSS class names.
 
 ## Compatibility
 
-This branch targets **Tailwind CSS 4.1**, with mappings and compiler tests pinned to **4.1.18**. Tailwind CSS 3 compatibility is not maintained by this implementation. An npm release may not yet include the changes in this branch.
+Supports **Tailwind CSS 4.1**; mappings and compiler tests are pinned to **4.1.18**. Tailwind CSS 3 is not supported.
 
 Default utility conversion assumes the default theme, a `16px` root font size, and `0.25rem` spacing. Use `createGenerator({ mode: 'preserve' })` when those assumptions do not fit your application. The generator does not load your Tailwind configuration or evaluate styles in the DOM.
 
@@ -149,7 +149,7 @@ Exported types include `CSSInput`, `GeneratorOptions`, `ConversionResult`, `Conv
 
 ## Development
 
-Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1** (the latest stable pnpm at this update). `package.json` requires Node 24 and the same pnpm version; CI reads the mise configuration too. mise installs pnpm through its npm backend (`npm:pnpm`), which supports pnpm 12’s platform packages. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
+Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1**. `package.json` requires Node 24 and the same pnpm version; CI reads the mise configuration too. mise downloads pnpm's standalone binary (`aqua:pnpm/pnpm`), so no install scripts are involved. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
 
 ```sh
 mise trust
