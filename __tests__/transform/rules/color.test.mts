@@ -15,26 +15,12 @@ describe('color', () => {
     );
   });
 
-  test('text color var', () => {
-    expect(color(['color', 'var(--white, #fff)'])).toBe('text-white');
-  });
-
-  test('text color var cus', () => {
-    expect(color(['color', 'var(--white)'])).toBe('text-(--white)');
-  });
-
   test('text color arbitrary', () => {
     expect(color(['color', '#7743CE'])).toBe('text-[#7743CE]');
   });
 
   test('text-decoration-color', () => {
     expect(color(['text-decoration-color', '#e2e8f0'])).toBe(
-      'decoration-slate-200',
-    );
-  });
-
-  test('text color var', () => {
-    expect(color(['text-decoration-color', 'var(--test, #e2e8f0)'])).toBe(
       'decoration-slate-200',
     );
   });
@@ -49,12 +35,6 @@ describe('color', () => {
     expect(color(['background-color', 'oklch(89.2% 0.058 10.001)'])).toBe(
       'bg-rose-200',
     );
-  });
-
-  test('text color var', () => {
-    expect(
-      color(['background-color', 'var(--test, oklch(89.2% 0.058 10.001))']),
-    ).toBe('bg-rose-200');
   });
 
   test('text color arbitrary', () => {

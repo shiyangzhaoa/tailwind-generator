@@ -1,5 +1,5 @@
 import { designTokenVars } from '../../tokens.mjs';
-import { getTailwindBy } from '../../utils/index.mjs';
+import { getTailwindBy } from '../../core/mappings.mjs';
 import { isString } from '../../utils/validator.mjs';
 import { try2PX, try2REM, toTailwindClass } from '../functions.mjs';
 

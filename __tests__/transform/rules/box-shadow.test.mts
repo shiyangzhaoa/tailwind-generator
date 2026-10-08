@@ -1,20 +1,14 @@
 import { compile } from 'tailwindcss';
-import { filter as convert } from '../../../src/transform/rules/filter.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [
-  ['filter', 'blur(4px)'],
-  ['filter', 'blur(17px)'],
-  ['filter', 'brightness(0.4)'],
-  ['filter', 'contrast(200%)'],
-  ['filter', 'drop-shadow(16px 16px 20px blue)'],
-  [
-    'filter',
-    'drop-shadow(3px 3px red) sepia(100%) drop-shadow(-3px -3px blue)',
-  ],
+  ['box-shadow', '0 1px 2px 0 rgb(0, 0, 0, 0.05)'],
+  ['box-shadow', 'unset'],
+  ['box-shadow', 'xxx'],
 ];
 
-describe('filter: whole declaration', () => {
+describe('box-shadow: whole declaration', () => {
   test('does not handle unrelated properties', () => {
     expect(convert(['unrelated', '12px'])).toBe(false);
   });

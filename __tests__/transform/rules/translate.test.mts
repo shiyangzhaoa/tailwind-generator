@@ -1,14 +1,25 @@
 import { compile } from 'tailwindcss';
-import { transitionProperty as convert } from '../../../src/transform/rules/transition-property.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [
-  ['transition-property', 'none'],
-  ['transition-property', 'all'],
-  ['transition-property', 'width, height'],
+  ['translate', '12px'],
+  ['translate', '50%'],
+  ['translate', '100%'],
+  ['translate', '-12px'],
+  ['translate', '12px 24px'],
+  ['translate', '50% 25%'],
+  ['translate', '0 12px'],
+  ['translate', '12px 0'],
+  ['translate', '12px 24px 0'],
+  ['translate', '12px 24px 8px'],
+  ['translate', '0'],
+  ['translate', '  12px   24px  '],
+  ['translate', '13px'],
+  ['translate', '-12px -24px'],
 ];
 
-describe('transition-property: whole declaration', () => {
+describe('translate: whole declaration', () => {
   test('does not handle unrelated properties', () => {
     expect(convert(['unrelated', '12px'])).toBe(false);
   });

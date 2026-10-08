@@ -1,10 +1,9 @@
 import { compile } from 'tailwindcss';
-import { background as convert } from '../../../src/transform/rules/background.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [
   ['background', 'green'],
-  ['background', 'var(--color, #ccc)'],
   ['background', '#ff0000'],
   ['background', 'rgb(255, 0, 0)'],
   ['background', 'transparent'],
@@ -37,7 +36,6 @@ const fixtures: [string, string][] = [
   ],
   ['background', 'top left / 50% 25% no-repeat #fff'],
   ['background', 'oklch(0.5 0.2 180)'],
-  ['background', 'var(--bg-color)'],
 ];
 
 describe('background: whole declaration', () => {

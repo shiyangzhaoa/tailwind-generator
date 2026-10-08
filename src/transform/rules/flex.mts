@@ -1,4 +1,4 @@
-import { getTailwindBy } from '../../utils/index.mjs';
+import { getTailwindBy } from '../../core/mappings.mjs';
 import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function flex([key, value]: [string, string]) {

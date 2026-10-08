@@ -1,5 +1,5 @@
 import { designTokenVars } from '../../tokens.mjs';
-import { getTailwindBy } from '../../utils/index.mjs';
+import { getTailwindBy } from '../../core/mappings.mjs';
 import { mergeMultiAttr, toTailwindClass } from '../functions.mjs';
 
 export function fontFamily([key, value]: [string, string]) {

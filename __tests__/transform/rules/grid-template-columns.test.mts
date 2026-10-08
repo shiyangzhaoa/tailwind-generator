@@ -52,13 +52,6 @@ describe('grid-template-columns', () => {
     ).toBe('grid-cols-[repeat(3,minmax(100px,1fr))]');
   });
 
-  // 变量用例
-  test('grid-template-columns with CSS variable', () => {
-    expect(
-      gridTemplateColumns(['grid-template-columns', 'var(--grid-cols)']),
-    ).toBe('grid-cols-(--grid-cols)');
-  });
-
   // 无效输入
   test('grid-template-columns invalid input', () => {
     expect(gridTemplateColumns(['grid-template-columns', 'invalid'])).toBe(

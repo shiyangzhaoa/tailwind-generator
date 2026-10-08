@@ -1,6 +1,6 @@
 import { designTokenVars } from '../../tokens.mjs';
-import { getTailwindBy } from '../../utils/index.mjs';
-import { isString, isVAR } from '../../utils/validator.mjs';
+import { getTailwindBy } from '../../core/mappings.mjs';
+import { isString } from '../../utils/validator.mjs';
 import { try2oklch, toTailwindClass } from '../functions.mjs';
 
 const map: Record<string, string | { key: string }> = {
@@ -55,8 +55,5 @@ export function color([key, value]: [string, string]) {
 
   const prefix = isString(config) ? config : config.key;
 
-  return toTailwindClass(
-    prefix,
-    isVAR(value) ? value.replaceAll(/\s/g, '') : value.replaceAll(/\s/g, '_'),
-  );
+  return toTailwindClass(prefix, value.replaceAll(/\s/g, '_'));
 }

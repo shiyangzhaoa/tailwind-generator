@@ -45,10 +45,6 @@ describe('flex', () => {
     expect(flex(['flex', 'calc(100% - 20px)'])).toBe('flex-[calc(100%-20px)]');
   });
 
-  test('var value', () => {
-    expect(flex(['flex', 'var(--flex-value)'])).toBe('flex-(--flex-value)');
-  });
-
   test('negative value', () => {
     expect(flex(['flex', '-1'])).toBe('flex-[-1]');
   });

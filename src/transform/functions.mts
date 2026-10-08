@@ -1,16 +1,6 @@
-import Color from 'color';
 import ColorJS from 'colorjs.io';
 
-import { unitProcess } from './parsers/unit.mjs';
-import {
-  isCSSFunc,
-  isHex,
-  isPX,
-  isREM,
-  isRGB,
-  isVAR,
-  isVARValue,
-} from '../utils/validator.mjs';
+import { isCSSFunc, isPX, isREM } from '../utils/validator.mjs';
 import {
   assertNever,
   removeSpace,
@@ -52,10 +42,6 @@ export function try2PX(val: string) {
     return rem2px(val);
   }
 
-  if (isVAR(val)) {
-    return try2PX(unitProcess(val, { model: 'length' }));
-  }
-
   return removeSpace(val);
 }
 
@@ -64,45 +50,24 @@ export function try2REM(val: string) {
     return px2rem(val);
   }
 
-  if (isVAR(val)) {
-    return try2REM(unitProcess(val, { model: 'length' }));
-  }
-
-  return val;
-}
-
-export function try2RGB(val: string) {
-  if (isHex(val) || isRGB(val)) {
-    return Color(val).rgb().string();
-  }
-
-  if (isVAR(val)) {
-    return try2RGB(unitProcess(val, { model: 'var' }));
-  }
-
   return val;
 }
 
 export function try2oklch(val: string) {
-  const realVal = tryGetValueDeep(val, 'var');
-
-  if (['inherit', 'transparent', 'currentColor'].includes(realVal)) {
-    return realVal;
+  if (['inherit', 'transparent', 'currentColor'].includes(val)) {
+    return val;
   }
 
   try {
-    const colorjs = new ColorJS(realVal);
+    const colorjs = new ColorJS(val);
     // Translucent colors must not match opaque theme tokens.
-    if (Number(colorjs.alpha) !== 1) return realVal;
+    if (Number(colorjs.alpha) !== 1) return val;
 
     const srgb = colorjs.to('srgb');
 
-    const rgbArr = srgb.coords.map((coord) => Math.round(coord * 255));
-    const color = Color({ r: rgbArr[0], g: rgbArr[1], b: rgbArr[2] });
-    const hex = color.hex();
-
-    if (hex === '#000000') return '#000';
-    if (hex === '#FFFFFF') return '#fff';
+    const channels = srgb.coords.map((coord) => Math.round(coord * 255));
+    if (channels.every((channel) => channel === 0)) return '#000';
+    if (channels.every((channel) => channel === 255)) return '#fff';
 
     const [l, c, h] = colorjs.to('oklch').coords;
 
@@ -111,66 +76,16 @@ export function try2oklch(val: string) {
 
     return `oklch(${toFixedWithoutTrailingZeros(l, 3)} ${toFixedWithoutTrailingZeros(cValue, 3)} ${toFixedWithoutTrailingZeros(hValue, 3)})`;
   } catch {
-    return realVal;
+    return val;
   }
 }
-
-export function tryGetNumber(value: string) {
-  let realVal: number;
-
-  if (value.endsWith('%')) {
-    realVal = parseFloat(value) / 100;
-  } else {
-    realVal = parseFloat(value);
-  }
-
-  if (Number.isNaN(realVal)) {
-    return value;
-  }
-
-  return realVal.toString();
-}
-
-export function number2Percent(value: string) {
-  if (value.endsWith('%')) {
-    const num = parseFloat(value);
-    if (Number.isNaN(num)) return value;
-
-    return num.toString();
-  }
-
-  const num = parseFloat(value);
-
-  if (Number.isNaN(num)) {
-    return value;
-  }
-
-  return (num * 100).toString();
-}
-
-const VAR_WITH_LENGTH = [
-  'border-width',
-  'outline-width',
-  'stroke-width',
-  'border-spacing',
-  'text-decoration-thickness',
-  'font-size',
-];
 
 export function toTailwindClass(
   prefix: string,
   value: string,
   opt?: { mode: 'px' | 'spacing' | 'number' | undefined },
 ) {
-  const varVal = removeSpace(tryGetValueDeep(value, 'var'));
-
-  if (VAR_WITH_LENGTH.includes(prefix) && isVARValue(varVal)) {
-    return `${prefix}-(length:${varVal})`;
-  }
-
-  if (isVARValue(varVal)) {
-    return `${prefix}-(${varVal})`;
-  }
+  const varVal = removeSpace(value);
 
   if (!opt?.mode) {
     return `${prefix}-[${varVal}]`;
@@ -211,19 +126,7 @@ export function toTailwindClass(
   return '';
 }
 
-export function tryGetValueDeep(val: string, model: 'var' | 'length') {
-  if (isVAR(val)) {
-    return tryGetValueDeep(unitProcess(val, { model }), model);
-  }
-
-  return val;
-}
-
 function tryGetPX(val: string) {
-  if (isVARValue(val)) {
-    return undefined;
-  }
-
   if (isREM(val)) {
     return parseFloat(try2PX(val));
   }

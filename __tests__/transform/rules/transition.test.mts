@@ -1,30 +1,15 @@
 import { compile } from 'tailwindcss';
-import { scale as convert } from '../../../src/transform/rules/scale.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [
-  ['scale', '1'],
-  ['scale', '0.5'],
-  ['scale', '0.75'],
-  ['scale', '1.25'],
-  ['scale', '0.7'],
-  ['scale', '50%'],
-  ['scale', '125%'],
-  ['scale', '70%'],
-  ['scale', '1.25 1'],
-  ['scale', '1 0.5'],
-  ['scale', '1.25 0.75'],
-  ['scale', '125% 100%'],
-  ['scale', '1 1 1.5'],
-  ['scale', '1 1 1'],
-  ['scale', '1.5 1 1'],
-  ['scale', '1 1.5 1'],
-  ['scale', '1.25 0.75 1.5'],
-  ['scale', '0'],
-  ['scale', '  1.5   1  '],
+  ['transition', 'margin-right 4s'],
+  ['transition', 'margin-right 4s 1s'],
+  ['transition', 'margin-right 4s ease-in-out'],
+  ['transition', 'margin-right 4s, color 1s'],
 ];
 
-describe('scale: whole declaration', () => {
+describe('transition: whole declaration', () => {
   test('does not handle unrelated properties', () => {
     expect(convert(['unrelated', '12px'])).toBe(false);
   });

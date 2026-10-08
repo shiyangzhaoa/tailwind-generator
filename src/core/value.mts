@@ -1,4 +1,4 @@
-import valueParser, { type Node } from 'postcss-value-parser';
+import valueParser from 'postcss-value-parser';
 import type { ConversionContext } from './types.mjs';
 
 export function parseValue(value: string) {

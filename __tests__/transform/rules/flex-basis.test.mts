@@ -13,12 +13,6 @@ describe('flex basis', () => {
     expect(flexBasis(['flex-basis', '13px'])).toBe('basis-[13px]');
   });
 
-  test('var', () => {
-    expect(flexBasis(['flex-basis', 'var(--length, 13px)'])).toBe(
-      'basis-[13px]',
-    );
-  });
-
   test('percentage', () => {
     expect(flexBasis(['flex-basis', '13%'])).toBe('basis-[13%]');
   });

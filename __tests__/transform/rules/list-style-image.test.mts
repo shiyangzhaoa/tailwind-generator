@@ -23,12 +23,6 @@ describe('list-style-image', () => {
     ).toBe('list-image-[url(data:image/png;base64,ABC123)]');
   });
 
-  test('url with CSS variable', () => {
-    expect(listStyleImage(['list-style-image', 'var(--custom-icon)'])).toBe(
-      'list-image-(--custom-icon)',
-    );
-  });
-
   test('url with simple path', () => {
     expect(listStyleImage(['list-style-image', 'url(icon.png)'])).toBe(
       'list-image-[url(icon.png)]',

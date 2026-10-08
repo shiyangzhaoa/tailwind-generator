@@ -1,5 +1,5 @@
 import { compile } from 'tailwindcss';
-import { backdropFilter as convert } from '../../../src/transform/rules/backdrop-filter.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [

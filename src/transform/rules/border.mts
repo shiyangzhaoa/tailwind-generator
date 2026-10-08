@@ -1,4 +1,4 @@
-import { atomicRule, convertAtomic } from './atomic.mjs';
+import { atomicRule } from './atomic.mjs';
 
 export const properties = [
   'border',
@@ -8,6 +8,3 @@ export const properties = [
   'border-left',
 ];
 export const rule = atomicRule('border', properties);
-export function border(declaration: [string, string]) {
-  return convertAtomic(declaration, properties);
-}

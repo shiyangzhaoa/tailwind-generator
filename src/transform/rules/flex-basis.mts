@@ -1,5 +1,5 @@
 import { designTokenVars } from '../../tokens.mjs';
-import { getTailwindBy } from '../../utils/index.mjs';
+import { getTailwindBy } from '../../core/mappings.mjs';
 import { try2REM, toTailwindClass } from '../functions.mjs';
 
 export function flexBasis([key, value]: [string, string]) {

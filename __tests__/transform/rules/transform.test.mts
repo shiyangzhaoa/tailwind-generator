@@ -1,15 +1,18 @@
 import { compile } from 'tailwindcss';
-import { transition as convert } from '../../../src/transform/rules/transition.mjs';
+import { convertDeclaration as convert } from '../../convert-declaration.mjs';
 import { parseValue } from '../../../src/core/value.mjs';
 
 const fixtures: [string, string][] = [
-  ['transition', 'margin-right 4s'],
-  ['transition', 'margin-right 4s 1s'],
-  ['transition', 'margin-right 4s ease-in-out'],
-  ['transition', 'margin-right 4s, color 1s'],
+  ['transform', 'scale(1)'],
+  ['transform', 'scale(0.7)'],
+  ['transform', 'scale(1.3, 0.4)'],
+  ['transform', 'rotate(1deg)'],
+  ['transform', 'rotate(11deg)'],
+  ['transform', 'translateY(50%)'],
+  ['transform', 'translateY(11px)'],
 ];
 
-describe('transition: whole declaration', () => {
+describe('transform: whole declaration', () => {
   test('does not handle unrelated properties', () => {
     expect(convert(['unrelated', '12px'])).toBe(false);
   });

@@ -31,6 +31,19 @@ const cases: [Parameters<typeof gen>[0], string][] = [
   [{ transform: 'rotate(-11deg)' }, '[transform:rotate(-11deg)]'],
   [{ transform: 'skewX(1rad)' }, '[transform:skewX(1rad)]'],
   [{ fontWeight: '450' }, 'font-[450]'],
+  // Fallbacks are substituted before any rule sees the value.
+  [{ flexBasis: 'var(--length, 13px)' }, 'basis-[13px]'],
+  [{ left: 'var(--length, 13px)' }, 'left-[13px]'],
+  [{ color: 'var(--white, #fff)' }, 'text-white'],
+  [{ textDecorationColor: 'var(--test, #e2e8f0)' }, 'decoration-slate-200'],
+  [
+    { backgroundColor: 'var(--test, oklch(89.2% 0.058 10.001))' },
+    'bg-rose-200',
+  ],
+  [{ background: 'var(--color, #ccc)' }, '[background:#ccc]'],
+  // Unresolved variables keep the whole declaration.
+  [{ flex: 'var(--flex-value)' }, '[flex:var(--flex-value)]'],
+  [{ lineHeight: 'var(--line-height)' }, '[line-height:var(--line-height)]'],
   [
     { fontWeight: 'var(--review-weight)' },
     '[font-weight:var(--review-weight)]',

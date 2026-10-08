@@ -37,12 +37,6 @@ describe('sizing', () => {
     expect(sizing(['line-height', '13px'])).toBe('leading-[13px]');
   });
 
-  test('line-height var', () => {
-    expect(sizing(['line-height', 'var(--var-line-height)'])).toBe(
-      'leading-(--var-line-height)',
-    );
-  });
-
   test('text-underline-offset', () => {
     expect(sizing(['text-underline-offset', '1px'])).toBe(
       'underline-offset-[1px]',
@@ -55,10 +49,6 @@ describe('sizing', () => {
 
   test('left cus', () => {
     expect(sizing(['left', '13px'])).toBe('left-[13px]');
-  });
-
-  test('left var', () => {
-    expect(sizing(['left', 'var(--length, 13px)'])).toBe('left-[13px]');
   });
 
   test('left end', () => {
@@ -204,11 +194,5 @@ describe('sizing', () => {
     expect(sizing(['perspective', '500px'])).toBe('perspective-normal');
     expect(sizing(['perspective', '0'])).toBe('perspective-[0]');
     expect(sizing(['perspective', '2000px'])).toBe('perspective-[2000px]');
-  });
-
-  test('perspective with var', () => {
-    expect(sizing(['perspective', 'var(--perspective-value)'])).toBe(
-      'perspective-(--perspective-value)',
-    );
   });
 });

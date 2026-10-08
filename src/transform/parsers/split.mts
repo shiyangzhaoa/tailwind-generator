@@ -84,16 +84,3 @@ export function splitBySpaces(
   const spaces = [' ', '\n', '\t'];
   return split(value, spaces);
 }
-
-/**
- * Splits a CSS declaration value (shorthand) using commas as the delimiters.
- */
-export function splitByCommas(
-  /**
-   * A CSS declaration value (shorthand).
-   */
-  value: string,
-) {
-  const comma = ',';
-  return split(value, [comma], { last: true });
-}
