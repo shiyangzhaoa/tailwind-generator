@@ -1,6 +1,7 @@
-// Decides the npm dist-tag for a release so that it never depends on someone
-// remembering `--tag`. Runs directly on Node 24 (type stripping) in the
-// release workflow, and is imported by tests.
+// Decides the npm dist-tag from the version alone. `changeset publish` would
+// publish any version outside pre mode to latest, including a prerelease or a
+// patch for an older line; this keeps both off latest. Runs directly on
+// Node 24 (type stripping) in the release workflow, and is imported by tests.
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
 
@@ -50,9 +51,6 @@ if (import.meta.main) {
     name: string;
     version: string;
   };
-  const ref = process.env.GITHUB_REF_NAME;
-  if (ref !== undefined && ref !== `v${pkg.version}`)
-    throw new Error(`Tag ${ref} does not match package version ${pkg.version}`);
   let latest: string | undefined;
   try {
     latest = execFileSync('npm', ['view', pkg.name, 'dist-tags.latest'], {

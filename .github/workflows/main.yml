@@ -1,10 +1,15 @@
 name: CI
 on:
   push:
-    # Tags are built by the release workflow, which calls this one.
+    # Release tags are created after the release workflow has run CI.
     branches: ['**']
   pull_request:
   workflow_call:
+    inputs:
+      coverage:
+        description: "'skip' to run without uploading coverage."
+        type: string
+        default: skip
 permissions:
   contents: read
 jobs:
@@ -37,8 +42,8 @@ jobs:
           pnpm exec playwright install --with-deps chromium
           npm run test:browser
       - name: Upload coverage to Codecov
-        # Releases reuse this workflow without secrets; branches report coverage.
-        if: github.ref_type != 'tag'
+        # Releases call this workflow without secrets; pushes and PRs upload.
+        if: inputs.coverage != 'skip'
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

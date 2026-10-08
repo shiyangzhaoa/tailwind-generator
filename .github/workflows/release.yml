@@ -1,16 +1,49 @@
 name: Release
-# Push a tag created by `npm version`: v1.2.3 publishes to latest,
-# v1.2.3-beta.0 to beta. See "Releasing" in README.md.
+# Pull requests add changesets with `pnpm changeset`. On main (stable) and next
+# (pre mode, beta), this workflow opens the "Version Packages" pull request
+# while changesets are pending, and publishes the version once it is merged.
+# See "Releasing" in README.md.
 on:
   push:
-    tags: ['v*']
+    branches: [main, next]
 permissions:
   contents: read
 concurrency:
-  group: release
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 jobs:
+  select-mode:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.select.outputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v4
+      - run: pnpm install --frozen-lockfile
+      - id: select
+        uses: changesets/action/select-mode@v2
+
+  version:
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'version'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v4
+      - run: pnpm install --frozen-lockfile
+      - uses: changesets/action/version@v2
+        with:
+          commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
+
+  # Publishing is ours rather than changesets/action/publish: the dist-tag is
+  # derived from the version, and npm publish is known to support OIDC.
   plan:
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'publish'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.channel.outputs.version }}
@@ -18,19 +51,15 @@ jobs:
       prerelease: ${{ steps.channel.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: jdx/mise-action@v4
       - name: Choose the npm dist-tag
         id: channel
         run: node scripts/release-channel.mts
       - name: Require stable releases to come from main
-        if: steps.channel.outputs.prerelease == 'false'
+        if: steps.channel.outputs.prerelease == 'false' && github.ref_name != 'main'
         run: |
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::$GITHUB_REF_NAME is not on main; stable releases must be merged first."
-            exit 1
-          fi
+          echo "::error::Stable ${{ steps.channel.outputs.version }} must be released from main, not ${{ github.ref_name }}."
+          exit 1
 
   ci:
     needs: plan
@@ -80,17 +109,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: package
           path: dist
-      - name: Create the GitHub release
+      - name: Tag and create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.plan.outputs.version }}
           PRERELEASE: ${{ needs.plan.outputs.prerelease }}
           LATEST: ${{ needs.plan.outputs.tag == 'latest' }}
         run: |
-          flags=(--verify-tag --generate-notes "--latest=$LATEST")
+          # The CHANGELOG.md section that changesets wrote for this version.
+          awk -v heading="## $VERSION" '$0 == heading { found = 1; next } /^## / { found = 0 } found' \
+            CHANGELOG.md > notes.md
+          flags=(--target "$GITHUB_SHA" --title "v$VERSION" --notes-file notes.md "--latest=$LATEST")
           if [ "$PRERELEASE" = true ]; then flags+=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" dist/*.tgz \
-            --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" "${flags[@]}"
+          gh release create "v$VERSION" dist/*.tgz "${flags[@]}"

@@ -178,30 +178,31 @@ Mappings and default tokens come from `data/tailwind-4.1.json`. Run `pnpm genera
 
 ## Releasing
 
-Releases are published by `.github/workflows/release.yml` when a `v*` tag is pushed. The npm dist-tag comes from the version, never from a manual `--tag`:
+Versions and `CHANGELOG.md` are managed with [Changesets](https://github.com/changesets/changesets); `.github/workflows/release.yml` publishes.
 
-| Version                    | npm dist-tag | GitHub release |
-| -------------------------- | ------------ | -------------- |
-| `1.2.0`                    | `latest`     | latest         |
-| `1.3.0-beta.0`             | `beta`       | pre-release    |
-| `1.3.0-rc.1`               | `rc`         | pre-release    |
-| `0.9.4` after `1.x` is out | `latest-0`   | not latest     |
+1. In a pull request that changes published behavior, run `pnpm changeset`, pick patch, minor, or major, and describe the change for users. Commit the generated `.changeset/*.md` file.
+2. When it is merged into `main`, the workflow opens or updates a "chore: version packages" pull request that bumps `package.json` and writes `CHANGELOG.md`.
+3. Merging that pull request publishes the version: it runs the full CI workflow, publishes the tarball to npm with provenance, tags `v<version>`, and creates the GitHub release from the changelog entry.
 
-Prerelease versions must be `<major>.<minor>.<patch>-<channel>.<n>`. A stable version lower than the current `latest` is a maintenance release and gets `latest-<major>`, so it never moves `latest` back.
+| Branch | Mode                       | Versions       | npm dist-tag |
+| ------ | -------------------------- | -------------- | ------------ |
+| `main` | normal                     | `0.1.0`        | `latest`     |
+| `next` | pre mode (`changeset pre`) | `0.2.0-beta.0` | `beta`       |
+
+The dist-tag comes from the version (`scripts/release-channel.mts`): `<x.y.z>-<channel>.<n>` publishes to `<channel>`, and a stable version lower than the current `latest` publishes to `latest-<major>`, so a prerelease or a maintenance release never moves `latest`. Stable versions are only published from `main`.
+
+Betas:
 
 ```sh
-# Beta from any branch
-npm version prerelease --preid beta   # 0.1.0-beta.0, 0.1.0-beta.1, ...
-git push --follow-tags
-
-# Stable from main
-npm version minor                     # 0.1.0
-git push --follow-tags
+git switch -c next main
+pnpm changeset pre enter beta   # commit .changeset/pre.json and push next
+# Merge changesets into next; each "version packages" PR on next publishes 0.2.0-beta.N.
+pnpm changeset pre exit         # before merging next into main for 0.2.0
 ```
-
-The workflow checks that the tag matches `package.json`, requires stable tags to be on `main`, runs the full CI workflow, publishes the tarball it built with npm provenance, and creates the GitHub release with the tarball attached.
 
 One-time setup:
 
 1. On npmjs.com, add a trusted publisher to the package: GitHub Actions, repository `shiyangzhaoa/tailwind-generator`, workflow `release.yml`, environment `npm`. No `NPM_TOKEN` is needed.
-2. In the GitHub repository settings, create the `npm` environment. Add required reviewers there if releases should wait for approval.
+2. In the GitHub repository settings, create the `npm` environment (add required reviewers to approve each publish), and under Actions > General enable "Allow GitHub Actions to create and approve pull requests".
+
+The version pull request is opened with the workflow token, so CI does not run on it; CI runs again in the release workflow before anything is published.
