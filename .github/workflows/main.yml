@@ -6,12 +6,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Node 20
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Install pnpm
-        run: npm install pnpm@10.10.0 -g
+      - name: Set up pinned Node.js and pnpm
+        uses: jdx/mise-action@v4
+      - name: Verify toolchain
+        run: |
+          node --version
+          pnpm --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Check generated mappings and TypeScript

@@ -142,6 +142,16 @@ Exported types include `CSSInput`, `GeneratorOptions`, `ConversionResult`, `Conv
 
 ## Development
 
+Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1** (the latest stable pnpm at this update). `package.json` requires Node 24 and the same pnpm version; CI reads the mise configuration too. mise installs pnpm through its npm backend (`npm:pnpm`), which supports pnpm 12’s platform packages. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
+
+```sh
+mise trust
+mise install
+mise exec -- pnpm install --frozen-lockfile
+```
+
+Activate mise in your shell, or prefix the following commands with `mise exec --`:
+
 ```sh
 pnpm install --frozen-lockfile
 pnpm check:mappings
