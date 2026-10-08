@@ -3,8 +3,12 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
+const minimumTypeScript = '5.8.3';
+// Packing needs the development Node; consumers can run on an older one.
+const consumerNode = process.env.CONSUMER_NODE ?? process.execPath;
+const consumerVersion = execFileSync(consumerNode, ['--version'], {
+  encoding: 'utf8',
+}).trim();
 const directory = mkdtempSync(join(tmpdir(), 'tailwind-generator-package-'));
 try {
   const pack = JSON.parse(
@@ -24,6 +28,8 @@ try {
       '--no-audit',
       '--no-fund',
       join(directory, pack[0].filename),
+      // The oldest TypeScript that accepts require() of ESM in .cts files.
+      `typescript@${minimumTypeScript}`,
     ],
     { cwd: directory, stdio: 'pipe' },
   );
@@ -41,7 +47,7 @@ try {
     );
     assert.deepEqual(
       JSON.parse(
-        execFileSync(process.execPath, [filename], {
+        execFileSync(consumerNode, [filename], {
           cwd: directory,
           encoding: 'utf8',
         }),
@@ -60,7 +66,7 @@ result.failed.forEach(failure => { const reason: string = failure.reason; });
   execFileSync(
     process.execPath,
     [
-      require.resolve('typescript/bin/tsc'),
+      join(directory, 'node_modules/typescript/bin/tsc'),
       '--noEmit',
       '--module',
       'NodeNext',
@@ -71,7 +77,9 @@ result.failed.forEach(failure => { const reason: string = failure.reason; });
     ],
     { cwd: directory, stdio: 'pipe' },
   );
-  console.log('Packed ESM/CommonJS entry points and consumer types passed');
+  console.log(
+    `Packed package works from import and require() on Node ${consumerVersion}; consumer types pass with TypeScript ${minimumTypeScript}`,
+  );
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }

@@ -9,6 +9,15 @@ Convert CSS declaration objects into Tailwind CSS class names.
 
 Supports **Tailwind CSS 4.1**; mappings and compiler tests are pinned to **4.1.18**. Tailwind CSS 3 is not supported.
 
+The package is ESM only and works from both `import` and `require()`:
+
+| Runtime    | Supported versions                                             |
+| ---------- | -------------------------------------------------------------- |
+| Node.js    | **24** (recommended), 22.12+, 20.19+                           |
+| TypeScript | 5.8+ to type-check CommonJS files (`.cts`, `module: nodenext`) |
+
+`require('tailwind-generator')` relies on Node.js loading ES modules from CommonJS, which needs Node.js 20.19 or 22.12 and later; older versions fail with `ERR_REQUIRE_ESM`. Node.js 22.12 prints an experimental warning that later versions do not. Bundlers such as Vite, webpack, and esbuild use the ESM build directly.
+
 Default utility conversion assumes the default theme, a `16px` root font size, and `0.25rem` spacing. Use `createGenerator({ mode: 'preserve' })` when those assumptions do not fit your application. The generator does not load your Tailwind configuration or evaluate styles in the DOM.
 
 ## Installation
@@ -149,7 +158,7 @@ Exported types include `CSSInput`, `GeneratorOptions`, `ConversionResult`, `Conv
 
 ## Development
 
-Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1**. `package.json` requires Node 24 and the same pnpm version; CI reads the mise configuration too. mise downloads pnpm's standalone binary (`aqua:pnpm/pnpm`), so no install scripts are involved. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
+Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1**. `package.json` requires them for development (`devEngines` and `packageManager`), separately from the runtime range users install with (`engines`); CI reads the mise configuration too. mise downloads pnpm's standalone binary (`aqua:pnpm/pnpm`), so no install scripts are involved. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
 
 ```sh
 mise trust
@@ -172,7 +181,7 @@ pnpm test:browser
 pnpm benchmark
 ```
 
-For an existing Chrome installation, set `CHROME_PATH` when running browser tests. The build produces ESM and CommonJS packages.
+For an existing Chrome installation, set `CHROME_PATH` when running browser tests. The build produces an ESM package; `test:package` imports and requires the packed tarball, and CI repeats that on Node.js 20.19 and 22.12 with `CONSUMER_NODE`.
 
 Mappings and default tokens come from `data/tailwind-4.1.json`. Run `pnpm generate:mappings` after changing the snapshot; do not edit generated files directly. See [the architecture guide](docs/architecture.md) for module boundaries, rule registration, mapping provenance, and verification limits.
 

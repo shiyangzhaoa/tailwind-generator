@@ -90,8 +90,8 @@ The compiler audit checks class existence, not semantic equivalence for every ma
 
 - Jest covers rules, the registry, value parsing, isolation, error reporting, and compiled declarations.
 - Playwright compares browser computed styles for order-sensitive transforms, filters, shorthand resets, alpha, string contents, and theme-independent literal output.
-- `test:package` installs an npm tarball in a temporary directory and checks both ESM and CommonJS entry points.
+- `test:package` installs the npm tarball in a temporary directory, loads it with `import` and `require()`, and type-checks `.mts` and `.cts` consumers with the oldest supported TypeScript. CI runs the consumers on the oldest Node.js versions in `engines` as well.
 - `benchmark` reports indexed matching and end-to-end throughput at several declaration counts. It has no machine-dependent pass/fail timing threshold.
 - CI checks source generation, compiler compatibility, types, tests, package exports, and browser equivalence.
 
-Generated files must not be edited directly. The current build still uses TypeScript for ESM and the existing source-copy transform for CommonJS; replacing the bundler is independent of the conversion architecture.
+Generated files must not be edited directly. The package is ESM only, built with `tsc`; CommonJS users load it through Node.js `require()` of ES modules.

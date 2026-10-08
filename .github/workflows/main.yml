@@ -48,3 +48,23 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: shiyangzhaoa/tailwind-generator
+
+  # The oldest runtimes in package.json "engines"; Node 24 is covered above.
+  consumers:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20.19.0', '22.12.0']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pinned Node.js and pnpm
+        uses: jdx/mise-action@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: npm run build
+      - name: Install the consumer runtime
+        run: mise install node@${{ matrix.node }}
+      - name: Import and require the packed package on Node ${{ matrix.node }}
+        run: CONSUMER_NODE="$(mise where node@${{ matrix.node }})/bin/node" npm run test:package
