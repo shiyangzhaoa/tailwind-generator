@@ -101,7 +101,8 @@ jobs:
           name: package
           path: dist
       - name: Publish to npm
-        run: npm publish dist/*.tgz --tag "${{ needs.plan.outputs.tag }}" --provenance
+        # ./ makes npm read a local tarball; dist/x.tgz is GitHub shorthand.
+        run: npm publish ./dist/*.tgz --tag "${{ needs.plan.outputs.tag }}" --provenance
 
   github-release:
     needs: [plan, publish]
