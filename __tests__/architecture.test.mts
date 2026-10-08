@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { compile } from 'tailwindcss';
+import { mappings } from '../src/generated/mappings.mjs';
 import { createGenerator, gen } from '../src/index.mjs';
 import { createRegistry } from '../src/core/registry.mjs';
 import { getTailwindBy } from '../src/core/mappings.mjs';
@@ -93,6 +95,27 @@ describe('parsing and registration', () => {
     for (const rule of rules)
       for (const property of rule.properties)
         expect(registry.get(property)).toBe(rule);
+  });
+  test('generated mappings decode to every concrete source entry', () => {
+    const source = JSON.parse(
+      readFileSync(
+        new URL('../data/tailwind-4.1.json', import.meta.url),
+        'utf8',
+      ),
+    ) as {
+      entries: { declarations: Record<string, string>; classes: string }[];
+    };
+    const canonical = (list: typeof source.entries) =>
+      list
+        .map(({ declarations, classes }) =>
+          JSON.stringify([Object.entries(declarations).sort(), classes]),
+        )
+        .sort();
+    expect(canonical(mappings)).toEqual(
+      canonical(
+        source.entries.filter((entry) => !/[<>]/.test(JSON.stringify(entry))),
+      ),
+    );
   });
   test('combination matches consume only complete candidates', () => {
     const input = {

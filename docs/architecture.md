@@ -72,7 +72,7 @@ Preserve mode bypasses theme and exact-mapping optimizations and emits literal C
 
 ## Mapping source and generation
 
-`data/tailwind-4.1.json` is the versioned source for mappings and default tokens. Its provenance is the previous curated v4.1 table; it is not an exhaustive reverse export of the Tailwind compiler. `scripts/generate-mappings.mjs` validates duplicate declaration sets and emits `src/generated/mappings.mts` and `src/tokens.mts`. Documentation patterns containing `<value>` or similar placeholders are excluded from runtime output.
+`data/tailwind-4.1.json` is the versioned source for mappings and default tokens. Its provenance is the previous curated v4.1 table; it is not an exhaustive reverse export of the Tailwind compiler. `scripts/generate-mappings.mjs` validates duplicate declaration sets and emits `src/generated/mappings.mts` and `src/tokens.mts`. The generated table is compact: single declarations that embed the end of their class name, such as `bg-red-500` → `background-color: var(--color-red-500)`, are stored as templates with shared name lists, and every other entry stays literal in source order. `src/core/mapping-codec.mts` decodes it at load time; the generator imports the same decoder and refuses to write output that does not decode to the source entries. Documentation patterns containing `<value>` or similar placeholders are excluded from runtime output.
 
 The runtime indexes each mapping by an anchor property/value. Only candidates with that anchor are considered; longer matching combinations take precedence. A combination is consumed only when every declaration matches and none has already been consumed. This replaces recursive enumeration of input-property subsets.
 
