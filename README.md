@@ -7,7 +7,7 @@ Convert CSS declaration objects into Tailwind CSS class names.
 
 ## Compatibility
 
-Supports **Tailwind CSS 4.1**; mappings and compiler tests are pinned to **4.1.18**. Tailwind CSS 3 is not supported.
+Supports **Tailwind CSS 4.1**; class mappings are generated from Tailwind CSS 4.1.18. For Tailwind CSS 3, use `tailwind-generator@0.0.1`.
 
 The package is ESM only and works from both `import` and `require()`:
 
@@ -147,71 +147,22 @@ console.log(gen({ fontWeight: 450 }));
 // { converted: 'font-[450]', failed: [] }
 ```
 
-## Migration
+## Migrating from 0.0.x
 
 - `success` is now `converted`.
 - `failed` contains objects instead of property names. Use `failed.map(({ property }) => property)` for the previous list shape.
 - Variables are scoped to a call. Use `createGenerator({ variables })` to reuse explicit configuration.
 - Composite declarations and unresolved variables may produce different class strings. Their complete values are retained rather than partially decomposed.
+- The package is ESM only; `require()` needs Node.js 20.19+ or 22.12+ (see [Compatibility](#compatibility)).
+
+## TypeScript
 
 Exported types include `CSSInput`, `GeneratorOptions`, `ConversionResult`, `ConversionFailure`, and `ConversionFailureReason`.
 
-## Development
+## Contributing
 
-Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1**. `package.json` requires them for development (`devEngines` and `packageManager`), separately from the runtime range users install with (`engines`); CI reads the mise configuration too. mise downloads pnpm's standalone binary (`aqua:pnpm/pnpm`), so no install scripts are involved. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, checks, and releases. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
-```sh
-mise trust
-mise install
-mise exec -- pnpm install --frozen-lockfile
-```
+## License
 
-Activate mise in your shell, or prefix the following commands with `mise exec --`:
-
-```sh
-pnpm install --frozen-lockfile
-pnpm check:mappings
-pnpm verify:mappings
-pnpm typecheck
-pnpm test -- --runInBand
-pnpm build
-pnpm test:package
-pnpm exec playwright install chromium
-pnpm test:browser
-pnpm benchmark
-```
-
-For an existing Chrome installation, set `CHROME_PATH` when running browser tests. The build produces an ESM package; `test:package` imports and requires the packed tarball, and CI repeats that on Node.js 20.19 and 22.12 with `CONSUMER_NODE`.
-
-Mappings and default tokens come from `data/tailwind-4.1.json`. Run `pnpm generate:mappings` after changing the snapshot; do not edit generated files directly. See [the architecture guide](docs/architecture.md) for module boundaries, rule registration, mapping provenance, and verification limits.
-
-## Releasing
-
-Versions and `CHANGELOG.md` are managed with [Changesets](https://github.com/changesets/changesets); `.github/workflows/release.yml` publishes.
-
-1. In a pull request that changes published behavior, run `pnpm changeset`, pick patch, minor, or major, and describe the change for users. Commit the generated `.changeset/*.md` file.
-2. When it is merged into `main`, the workflow opens or updates a "chore: version packages" pull request that bumps `package.json` and writes `CHANGELOG.md`.
-3. Merging that pull request publishes the version: it runs the full CI workflow, publishes the tarball to npm with provenance, tags `v<version>`, and creates the GitHub release from the changelog entry.
-
-| Branch | Mode                       | Versions       | npm dist-tag |
-| ------ | -------------------------- | -------------- | ------------ |
-| `main` | normal                     | `0.1.0`        | `latest`     |
-| `next` | pre mode (`changeset pre`) | `0.2.0-beta.0` | `beta`       |
-
-The dist-tag comes from the version (`scripts/release-channel.mts`): `<x.y.z>-<channel>.<n>` publishes to `<channel>`, and a stable version lower than the current `latest` publishes to `latest-<major>`, so a prerelease or a maintenance release never moves `latest`. Stable versions are only published from `main`.
-
-Betas:
-
-```sh
-git switch -c next main
-pnpm changeset pre enter beta   # commit .changeset/pre.json and push next
-# Merge changesets into next; each "version packages" PR on next publishes 0.2.0-beta.N.
-pnpm changeset pre exit         # before merging next into main for 0.2.0
-```
-
-One-time setup:
-
-1. On npmjs.com, add a trusted publisher to the package: GitHub Actions, repository `shiyangzhaoa/tailwind-generator`, workflow `release.yml`, environment `npm`. No `NPM_TOKEN` is needed.
-2. In the GitHub repository settings, create the `npm` environment (add required reviewers to approve each publish), and under Actions > General enable "Allow GitHub Actions to create and approve pull requests".
-
-The version pull request is opened with the workflow token, so CI does not run on it; CI runs again in the release workflow before anything is published.
+MIT
