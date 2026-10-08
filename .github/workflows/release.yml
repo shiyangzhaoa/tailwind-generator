@@ -2,7 +2,7 @@ name: Release
 # Pull requests add changesets with `pnpm changeset`. On main (stable) and next
 # (pre mode, beta), this workflow opens the "Version Packages" pull request
 # while changesets are pending, and publishes the version once it is merged.
-# See "Releasing" in README.md.
+# See "Releasing" in CONTRIBUTING.md.
 on:
   push:
     branches: [main, next]
