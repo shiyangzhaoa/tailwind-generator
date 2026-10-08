@@ -1,7 +1,7 @@
 {
   "name": "tailwind-generator",
   "version": "0.0.2-beta.1",
-  "description": "This project was bootstrapped by CLI",
+  "description": "Convert CSS declaration objects into Tailwind CSS class names",
   "type": "module",
   "contributors": [
     "shiyangzhaoa"
