@@ -175,3 +175,33 @@ pnpm benchmark
 For an existing Chrome installation, set `CHROME_PATH` when running browser tests. The build produces ESM and CommonJS packages.
 
 Mappings and default tokens come from `data/tailwind-4.1.json`. Run `pnpm generate:mappings` after changing the snapshot; do not edit generated files directly. See [the architecture guide](docs/architecture.md) for module boundaries, rule registration, mapping provenance, and verification limits.
+
+## Releasing
+
+Releases are published by `.github/workflows/release.yml` when a `v*` tag is pushed. The npm dist-tag comes from the version, never from a manual `--tag`:
+
+| Version                    | npm dist-tag | GitHub release |
+| -------------------------- | ------------ | -------------- |
+| `1.2.0`                    | `latest`     | latest         |
+| `1.3.0-beta.0`             | `beta`       | pre-release    |
+| `1.3.0-rc.1`               | `rc`         | pre-release    |
+| `0.9.4` after `1.x` is out | `latest-0`   | not latest     |
+
+Prerelease versions must be `<major>.<minor>.<patch>-<channel>.<n>`. A stable version lower than the current `latest` is a maintenance release and gets `latest-<major>`, so it never moves `latest` back.
+
+```sh
+# Beta from any branch
+npm version prerelease --preid beta   # 0.1.0-beta.0, 0.1.0-beta.1, ...
+git push --follow-tags
+
+# Stable from main
+npm version minor                     # 0.1.0
+git push --follow-tags
+```
+
+The workflow checks that the tag matches `package.json`, requires stable tags to be on `main`, runs the full CI workflow, publishes the tarball it built with npm provenance, and creates the GitHub release with the tarball attached.
+
+One-time setup:
+
+1. On npmjs.com, add a trusted publisher to the package: GitHub Actions, repository `shiyangzhaoa/tailwind-generator`, workflow `release.yml`, environment `npm`. No `NPM_TOKEN` is needed.
+2. In the GitHub repository settings, create the `npm` environment. Add required reviewers there if releases should wait for approval.

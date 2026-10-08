@@ -6,6 +6,11 @@
   "contributors": [
     "shiyangzhaoa"
   ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiyangzhaoa/tailwind-generator.git"
+  },
   "files": [
     "esm",
     "cjs"
