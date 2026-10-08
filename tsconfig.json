@@ -9,7 +9,6 @@
     "newLine": "LF",
     "assumeChangesOnlyAffectDirectDependencies": true,
     "declaration": true,
-    "importHelpers": true,
     "exactOptionalPropertyTypes": true,
     "esModuleInterop": true,
     "checkJs": false,

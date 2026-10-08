@@ -1,20 +1,5 @@
-import { getTailwindBy } from '../../utils/index.mjs';
-import { tryGetVal } from '../functions.mjs';
+import { utilityRule } from './utility.mjs';
 
-export function bgSize([key, value]: [string, string]) {
-  if (key !== 'background-size') {
-    return false;
-  }
-
-  const { tailwind, useful } = getTailwindBy({
-    [key]: value,
-  });
-
-  if (!useful) {
-    return tailwind.join(' ');
-  }
-
-  const realVal = value.split(' ').join('_');
-
-  return `bg-[length:${tryGetVal(realVal)}]`;
-}
+export const rule = utilityRule('background-size', {
+  'background-size': { prefix: 'bg-size' },
+});

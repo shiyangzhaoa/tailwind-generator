@@ -1,18 +1,6 @@
-import { getTailwindBy } from '../../utils/index.mjs';
-import { try2REM, tryGetVal } from '../functions.mjs';
+import { try2REM } from '../functions.mjs';
+import { spacing, utilityRule } from './utility.mjs';
 
-export function flexBasis([key, value]: [string, string]) {
-  if (key !== 'flex-basis') {
-    return false;
-  }
-
-  const { tailwind, useful } = getTailwindBy({
-    [key]: try2REM(value),
-  });
-
-  if (!useful) {
-    return tailwind.join(' ');
-  }
-
-  return `basis-[${tryGetVal(value)}]`;
-}
+export const rule = utilityRule('flex-basis', {
+  'flex-basis': { prefix: 'basis', normalize: try2REM, fallback: spacing },
+});

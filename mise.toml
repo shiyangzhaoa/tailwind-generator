@@ -1,0 +1,4 @@
+[tools]
+node = "24.21.0"
+# Standalone binary from pnpm's GitHub releases; needs no install scripts.
+"aqua:pnpm/pnpm" = "12.10.1"

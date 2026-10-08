@@ -1,55 +1,217 @@
 # tailwind-generator
 
-Convert CSS declarations into TailwindCSS class names
+Convert CSS declaration objects into Tailwind CSS class names.
 
 [![codecov](https://codecov.io/gh/shiyangzhaoa/tailwind-generator/graph/badge.svg?token=8XKK9DE64P)](https://codecov.io/gh/shiyangzhaoa/tailwind-generator)
 [![shields](https://img.shields.io/npm/dm/tailwind-generator?style=flat-square)](https://www.npmjs.com/package/tailwind-generator)
 
-⚠️ TailwindCSS version support: >= 3.4.3
+## Compatibility
 
-## Example
+Supports **Tailwind CSS 4.1**; mappings and compiler tests are pinned to **4.1.18**. Tailwind CSS 3 is not supported.
 
-Base:
+The package is ESM only and works from both `import` and `require()`:
+
+| Runtime    | Supported versions                                             |
+| ---------- | -------------------------------------------------------------- |
+| Node.js    | **24** (recommended), 22.12+, 20.19+                           |
+| TypeScript | 5.8+ to type-check CommonJS files (`.cts`, `module: nodenext`) |
+
+`require('tailwind-generator')` relies on Node.js loading ES modules from CommonJS, which needs Node.js 20.19 or 22.12 and later; older versions fail with `ERR_REQUIRE_ESM`. Node.js 22.12 prints an experimental warning that later versions do not. Bundlers such as Vite, webpack, and esbuild use the ESM build directly.
+
+Default utility conversion assumes the default theme, a `16px` root font size, and `0.25rem` spacing. Use `createGenerator({ mode: 'preserve' })` when those assumptions do not fit your application. The generator does not load your Tailwind configuration or evaluate styles in the DOM.
+
+## Installation
+
+```sh
+npm install tailwind-generator
+```
+
+## Basic usage
 
 ```ts
 import { gen } from 'tailwind-generator';
 
-const result = gen({
-  'align-items': 'flex-start',
-  background: '#FFF',
-  display: 'flex',
-  'flex-direction': 'column',
-  gap: '16px',
-  padding: '24px',
-  width: '1152px',
+console.log(
+  gen({
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '24px',
+    width: '1152px',
+  }),
+);
+// { converted: 'flex flex-col p-6 w-6xl', failed: [] }
+```
+
+`gen(css, variables?)` accepts camelCase or kebab-case property names and string or number values. Properties with `undefined` values are ignored. Each call is independent.
+
+Input follows React's style object conventions:
+
+- Vendor-prefixed keys keep their prefix: `WebkitLineClamp` and `msTransform` become `-webkit-line-clamp` and `-ms-transform`.
+- Numbers are pixels, except for unitless properties such as `opacity`, `zIndex`, `flexGrow`, `fontWeight`, and `lineHeight`: `{ width: 100 }` is `width: 100px`.
+- A trailing `!important` becomes Tailwind's important modifier: `{ color: 'red !important' }` gives `text-[red]!`.
+- CSS keywords match case-insensitively: `display: 'FLEX'` gives `flex`.
+
+- `converted`: generated classes, merged with `tailwind-merge`.
+- `failed`: `{ property, value, reason }` objects. Property names use kebab-case; values preserve the original input, including whitespace.
+
+```ts
+import { gen } from 'tailwind-generator';
+
+console.log(gen({ padding: '24px', fontKerning: 'normal' }));
+// {
+//   converted: 'p-6',
+//   failed: [
+//     { property: 'font-kerning', value: 'normal', reason: 'unsupported-property' },
+//   ],
+// }
+```
+
+| Reason                 | Meaning                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `unsupported-property` | No registered rule or concrete mapping supports this property.                                  |
+| `unsupported-value`    | The property is supported but its value could not be converted.                                 |
+| `invalid-value`        | Empty value, non-finite number, or malformed boundaries, such as an unclosed function or quote. |
+
+This is not a complete CSS grammar validator. Syntactically balanced but invalid CSS can still pass through arbitrary-value output. Check failures and verify generated styles in your application.
+
+## CSS variables
+
+Known variables use their full names, including `--`. Supplied values take precedence over fallbacks. Variable values never leak into later calls.
+
+```ts
+import { gen } from 'tailwind-generator';
+
+console.log(
+  gen(
+    { height: 'var(--panel-height, 20px)' },
+    {
+      '--panel-height': '12px',
+    },
+  ),
+);
+// { converted: 'h-3', failed: [] }
+
+console.log(gen({ height: 'var(--panel-height)' }));
+// { converted: '[height:var(--panel-height)]', failed: [] }
+```
+
+Nested functions and fallbacks are supported. Cyclic references terminate and use a fallback where available; unresolved references remain in the output.
+
+## Reusable configuration and literal output
+
+`createGenerator(options)` returns a function with the same arguments as `gen()`. Options are snapshotted at creation; per-call variables override configured variables for that call only.
+
+```ts
+import { createGenerator } from 'tailwind-generator';
+
+const generate = createGenerator({
+  mode: 'preserve',
+  variables: { '--panel-width': '240px' },
 });
 
-console.log(result);
-
-// {
-//   success: 'items-start flex flex-col bg-white gap-[16px] p-6 w-[1152px]',
-//   failed: [],
-// }
+console.log(generate({ width: 'var(--panel-width)', padding: '24px' }));
+// { converted: '[width:240px] [padding:24px]', failed: [] }
 ```
 
-CSS Variables:
+`mode` is `'utilities'` by default. `'preserve'` emits literal arbitrary properties for supported declarations instead of matching theme tokens or spacing utilities. It preserves declaration values, but does not model the full cascade or resolve all overlapping shorthand/longhand interactions.
+
+## Complete declarations
+
+Complex declarations remain whole so function order, repeated functions, and shorthand resets are not lost:
 
 ```ts
 import { gen } from 'tailwind-generator';
 
-const result = gen(
-  {
-    height: 'var(--var-height)',
-  },
-  {
-    'var-height': '12px',
-  },
-);
+console.log(gen({ transform: 'rotate(10deg) translateX(20px)' }));
+// { converted: '[transform:rotate(10deg)_translateX(20px)]', failed: [] }
 
-console.log(result);
+console.log(gen({ filter: 'url(filters.svg#filter) blur(4px)' }));
+// { converted: '[filter:url(filters.svg#filter)_blur(4px)]', failed: [] }
 
-// {
-//   success: 'h-3',
-//   failed: [],
-// }
+console.log(gen({ background: '#FFF' }));
+// { converted: '[background:#FFF]', failed: [] }
 ```
+
+Use a longhand such as `backgroundColor` if you intend to change only the color. A `background` shorthand also resets other background properties, so it is preserved as a shorthand.
+
+Simple declarations can still use concise utilities:
+
+```ts
+import { gen } from 'tailwind-generator';
+
+console.log(gen({ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }));
+// { converted: 'grid-cols-4', failed: [] }
+console.log(gen({ color: 'rgba(0,0,0,0.5)' }));
+// { converted: 'text-[rgba(0,0,0,0.5)]', failed: [] }
+console.log(gen({ fontWeight: 450 }));
+// { converted: 'font-[450]', failed: [] }
+```
+
+## Migration
+
+- `success` is now `converted`.
+- `failed` contains objects instead of property names. Use `failed.map(({ property }) => property)` for the previous list shape.
+- Variables are scoped to a call. Use `createGenerator({ variables })` to reuse explicit configuration.
+- Composite declarations and unresolved variables may produce different class strings. Their complete values are retained rather than partially decomposed.
+
+Exported types include `CSSInput`, `GeneratorOptions`, `ConversionResult`, `ConversionFailure`, and `ConversionFailureReason`.
+
+## Development
+
+Install [mise](https://mise.jdx.dev/), then use the versions pinned in `mise.toml`: Node.js **24.21.0** and pnpm **12.10.1**. `package.json` requires them for development (`devEngines` and `packageManager`), separately from the runtime range users install with (`engines`); CI reads the mise configuration too. mise downloads pnpm's standalone binary (`aqua:pnpm/pnpm`), so no install scripts are involved. `pnpm-workspace.yaml` rejects toolchain mismatches instead of silently switching versions.
+
+```sh
+mise trust
+mise install
+mise exec -- pnpm install --frozen-lockfile
+```
+
+Activate mise in your shell, or prefix the following commands with `mise exec --`:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm check:mappings
+pnpm verify:mappings
+pnpm typecheck
+pnpm test -- --runInBand
+pnpm build
+pnpm test:package
+pnpm exec playwright install chromium
+pnpm test:browser
+pnpm benchmark
+```
+
+For an existing Chrome installation, set `CHROME_PATH` when running browser tests. The build produces an ESM package; `test:package` imports and requires the packed tarball, and CI repeats that on Node.js 20.19 and 22.12 with `CONSUMER_NODE`.
+
+Mappings and default tokens come from `data/tailwind-4.1.json`. Run `pnpm generate:mappings` after changing the snapshot; do not edit generated files directly. See [the architecture guide](docs/architecture.md) for module boundaries, rule registration, mapping provenance, and verification limits.
+
+## Releasing
+
+Versions and `CHANGELOG.md` are managed with [Changesets](https://github.com/changesets/changesets); `.github/workflows/release.yml` publishes.
+
+1. In a pull request that changes published behavior, run `pnpm changeset`, pick patch, minor, or major, and describe the change for users. Commit the generated `.changeset/*.md` file.
+2. When it is merged into `main`, the workflow opens or updates a "chore: version packages" pull request that bumps `package.json` and writes `CHANGELOG.md`.
+3. Merging that pull request publishes the version: it runs the full CI workflow, publishes the tarball to npm with provenance, tags `v<version>`, and creates the GitHub release from the changelog entry.
+
+| Branch | Mode                       | Versions       | npm dist-tag |
+| ------ | -------------------------- | -------------- | ------------ |
+| `main` | normal                     | `0.1.0`        | `latest`     |
+| `next` | pre mode (`changeset pre`) | `0.2.0-beta.0` | `beta`       |
+
+The dist-tag comes from the version (`scripts/release-channel.mts`): `<x.y.z>-<channel>.<n>` publishes to `<channel>`, and a stable version lower than the current `latest` publishes to `latest-<major>`, so a prerelease or a maintenance release never moves `latest`. Stable versions are only published from `main`.
+
+Betas:
+
+```sh
+git switch -c next main
+pnpm changeset pre enter beta   # commit .changeset/pre.json and push next
+# Merge changesets into next; each "version packages" PR on next publishes 0.2.0-beta.N.
+pnpm changeset pre exit         # before merging next into main for 0.2.0
+```
+
+One-time setup:
+
+1. On npmjs.com, add a trusted publisher to the package: GitHub Actions, repository `shiyangzhaoa/tailwind-generator`, workflow `release.yml`, environment `npm`. No `NPM_TOKEN` is needed.
+2. In the GitHub repository settings, create the `npm` environment (add required reviewers to approve each publish), and under Actions > General enable "Allow GitHub Actions to create and approve pull requests".
+
+The version pull request is opened with the workflow token, so CI does not run on it; CI runs again in the release workflow before anything is published.

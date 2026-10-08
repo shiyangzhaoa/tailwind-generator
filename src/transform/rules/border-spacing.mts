@@ -1,45 +1,21 @@
-import { error } from 'console';
+import { try2REM } from '../functions.mjs';
 import { splitBySpaces } from '../parsers/split.mjs';
-import { getTailwindBy } from '../../utils/index.mjs';
-import { try2REM, tryGetVal } from '../functions.mjs';
+import { spacing, utilityRule } from './utility.mjs';
 
-export function borderSpacing([key, value]: [string, string]) {
-  if (key !== 'border-spacing') {
-    return false;
-  }
-
-  const tokens = splitBySpaces(value);
-  let x: string;
-  let y: string;
-
-  if (tokens.length === 1) {
-    x = y = tokens[0];
-  } else if (tokens.length === 2) {
-    x = tokens[0];
-    y = tokens[1];
-  } else {
-    error(`${key}: ${value} is invalid.`);
-
-    return false;
-  }
-
-  const xrem = try2REM(x);
-  const yrem = try2REM(y);
-
-  const { tailwind, useful } = getTailwindBy({
-    [key]: [xrem, yrem].join(' '),
-  });
-
-  if (!useful) {
-    return tailwind.join(' ');
-  }
-
-  if (xrem === yrem) {
-    return `border-spacing-[${tryGetVal(x)}]`;
-  }
-
-  return [
-    `border-spacing-x-[${tryGetVal(x)}]`,
-    `border-spacing-y-[${tryGetVal(y)}]`,
-  ].join(' ');
+function axes(value: string) {
+  const [x, y = x, ...rest] = splitBySpaces(value);
+  return rest.length ? undefined : [x, y];
 }
+
+export const rule = utilityRule('border-spacing', {
+  'border-spacing': {
+    prefix: 'border-spacing',
+    normalize: (value) => axes(value)?.map(try2REM).join(' ') ?? value,
+    fallback(prefix, value) {
+      const [x, y] = axes(value) ?? [];
+      if (x === undefined || y === undefined) return false;
+      if (try2REM(x) === try2REM(y)) return spacing(prefix, x);
+      return `${spacing(`${prefix}-x`, x)} ${spacing(`${prefix}-y`, y)}`;
+    },
+  },
+});
