@@ -35,6 +35,13 @@ console.log(
 
 `gen(css, variables?)` accepts camelCase or kebab-case property names and string or number values. Properties with `undefined` values are ignored. Each call is independent.
 
+Input follows React's style object conventions:
+
+- Vendor-prefixed keys keep their prefix: `WebkitLineClamp` and `msTransform` become `-webkit-line-clamp` and `-ms-transform`.
+- Numbers are pixels, except for unitless properties such as `opacity`, `zIndex`, `flexGrow`, `fontWeight`, and `lineHeight`: `{ width: 100 }` is `width: 100px`.
+- A trailing `!important` becomes Tailwind's important modifier: `{ color: 'red !important' }` gives `text-[red]!`.
+- CSS keywords match case-insensitively: `display: 'FLEX'` gives `flex`.
+
 - `converted`: generated classes, merged with `tailwind-merge`.
 - `failed`: `{ property, value, reason }` objects. Property names use kebab-case; values preserve the original input, including whitespace.
 
@@ -50,11 +57,11 @@ console.log(gen({ padding: '24px', fontKerning: 'normal' }));
 // }
 ```
 
-| Reason                 | Meaning                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `unsupported-property` | No registered rule or concrete mapping supports this property.              |
-| `unsupported-value`    | The property is supported but its value could not be converted.             |
-| `invalid-value`        | Empty value or malformed boundaries, such as an unclosed function or quote. |
+| Reason                 | Meaning                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `unsupported-property` | No registered rule or concrete mapping supports this property.                                  |
+| `unsupported-value`    | The property is supported but its value could not be converted.                                 |
+| `invalid-value`        | Empty value, non-finite number, or malformed boundaries, such as an unclosed function or quote. |
 
 This is not a complete CSS grammar validator. Syntactically balanced but invalid CSS can still pass through arbitrary-value output. Check failures and verify generated styles in your application.
 

@@ -3,9 +3,13 @@ import type { CamelCaseToKebabCase } from '../utils/type.mjs';
 import type { Node } from 'postcss-value-parser';
 
 type KebabCaseProperties<T> = {
-  [K in keyof T as CamelCaseToKebabCase<K>]: T[K];
+  [K in keyof T as K extends `ms${infer Rest}`
+    ? `-ms${CamelCaseToKebabCase<Rest>}`
+    : CamelCaseToKebabCase<K>]: T[K];
 };
-export type CSSInput = CSS.Properties | KebabCaseProperties<CSS.Properties>;
+// Numeric lengths are pixels, as in React's CSSProperties.
+type Properties = CSS.Properties<string | number>;
+export type CSSInput = Properties | KebabCaseProperties<Properties>;
 export type ConversionFailureReason =
   | 'unsupported-property'
   | 'unsupported-value'
@@ -33,6 +37,8 @@ export interface Declaration {
   readonly property: string;
   readonly originalValue: string | number;
   readonly value: string;
+  /** Declared with `!important`; the flag is not part of `value`. */
+  readonly important: boolean;
   readonly nodes: readonly Node[];
 }
 export type RuleResult =

@@ -16,17 +16,24 @@ flowchart LR
 
 ## Module boundaries
 
-| Module                      | Responsibility                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `src/index.mts`             | Public entry points and exported types. Internal modules do not import it.                              |
-| `src/core/engine.mts`       | Coordinates parsing, mapping, rule dispatch, and diagnostics.                                           |
-| `src/core/types.mts`        | Declaration, context, rule result, and public result contracts.                                         |
-| `src/core/value.mts`        | Shared value parsing, boundary validation, function parsing, and variable resolution.                   |
-| `src/core/serialize.mts`    | Emits complete arbitrary properties, preserving quoted contents, literal underscores, and URL payloads. |
-| `src/core/registry.mts`     | Builds the property-to-rule index and rejects duplicate registrations.                                  |
-| `src/core/mappings.mts`     | Builds exact-match candidate indexes from generated data.                                               |
-| `src/transform/rules/`      | Property-specific utility optimizers and whole-declaration rules.                                       |
-| `src/transform/context.mts` | Creates immutable per-call variable/configuration snapshots.                                            |
+| Module                      | Responsibility                                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/index.mts`             | Public entry points and exported types. Internal modules do not import it.                                  |
+| `src/core/input.mts`        | Property name hyphenation, numeric units, and `!important` extraction, following React's style conventions. |
+| `src/core/engine.mts`       | Coordinates parsing, mapping, rule dispatch, and diagnostics.                                               |
+| `src/core/types.mts`        | Declaration, context, rule result, and public result contracts.                                             |
+| `src/core/value.mts`        | Shared value parsing, boundary validation, function parsing, and variable resolution.                       |
+| `src/core/serialize.mts`    | Emits complete arbitrary properties, preserving quoted contents, literal underscores, and URL payloads.     |
+| `src/core/registry.mts`     | Builds the property-to-rule index and rejects duplicate registrations.                                      |
+| `src/core/mappings.mts`     | Builds exact-match candidate indexes from generated data.                                                   |
+| `src/transform/rules/`      | Property-specific utility optimizers and whole-declaration rules.                                           |
+| `src/transform/context.mts` | Creates immutable per-call variable/configuration snapshots.                                                |
+
+## Input normalization
+
+Keys are hyphenated as React does, so vendor prefixes survive (`WebkitLineClamp` → `-webkit-line-clamp`, `msTransform` → `-ms-transform`). Non-zero numbers become pixels unless the property is unitless. A trailing `!important` is removed from the value before parsing and recorded on the declaration; every class produced for that declaration gets Tailwind's trailing `!` modifier. Exact mappings are matched separately for important and normal declarations, so a combined class never mixes the two.
+
+Exact-mapping lookup compares pure identifiers case-insensitively. Other values, such as strings, URLs, and variable names, are compared exactly and never rewritten.
 
 ## Context lifetime
 

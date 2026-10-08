@@ -5,14 +5,20 @@ interface Candidate {
   classes: string;
 }
 
+// CSS keywords are case-insensitive; other values (strings, URLs, variables)
+// are compared exactly.
+function canonical(value: string) {
+  return /^-?[A-Za-z][A-Za-z-]*$/.test(value) ? value.toLowerCase() : value;
+}
+
 // Index each candidate by its first property/value. Matching only visits candidates
 // that could match the input, rather than enumerating all input subsets.
 const index = new Map<string, Candidate[]>();
 export const mappedProperties = new Set<string>();
 for (const mapping of mappings) {
-  const declarations = Object.entries(mapping.declarations).sort(([a], [b]) =>
-    a.localeCompare(b),
-  );
+  const declarations = Object.entries(mapping.declarations)
+    .map(([property, value]): [string, string] => [property, canonical(value)])
+    .sort(([a], [b]) => a.localeCompare(b));
   for (const [property] of declarations) mappedProperties.add(property);
   const anchor = JSON.stringify(declarations[0]);
   const candidates = index.get(anchor) ?? [];
@@ -29,11 +35,14 @@ export function getTailwindBy(rule: Record<string, string>) {
   for (const property of Object.keys(rule).sort()) {
     if (consumed.has(property)) continue;
     const candidates =
-      index.get(JSON.stringify([property, rule[property]])) ?? [];
+      index.get(JSON.stringify([property, canonical(rule[property])])) ?? [];
     for (const candidate of candidates) {
       if (
         !candidate.declarations.every(
-          ([key, value]) => !consumed.has(key) && rule[key] === value,
+          ([key, value]) =>
+            !consumed.has(key) &&
+            Object.hasOwn(rule, key) &&
+            canonical(rule[key]) === value,
         )
       )
         continue;

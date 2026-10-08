@@ -20,8 +20,7 @@ import { flex } from './flex.mjs';
 import { gridTemplateColumns } from './grid-template-columns.mjs';
 import { fontFamily } from './font-family.mjs';
 import { listStyleImage } from './list-style-image.mjs';
-import { margin, properties as marginProperties } from './margin.mjs';
-import { padding, properties as paddingProperties } from './padding.mjs';
+import { boxSpacing } from './box-spacing.mjs';
 import { sizing, properties as sizingProperties } from './sizing.mjs';
 
 import type { Rule } from '../../core/types.mjs';
@@ -88,8 +87,10 @@ export const rules: readonly Rule[] = [
     gridTemplateColumns,
   ),
   utilityRule('list-style-image', ['list-style-image'], listStyleImage),
-  utilityRule('margin', marginProperties, margin),
-  utilityRule('padding', paddingProperties, padding),
+  ...(['margin', 'padding'] as const).map((name) => {
+    const { properties, convert } = boxSpacing(name);
+    return utilityRule(name, properties, convert);
+  }),
   utilityRule('sizing', sizingProperties, sizing),
 ];
 
